@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VeriHome{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F59E0B',
+                        secondary: '#4B5563'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        'DEFAULT': '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #111827;
+            color: #E5E7EB;
+            overflow-x: hidden;
+        }
+        .montserrat {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .nav-link {
+            transition: color 300ms ease;
+        }
+        .nav-link:hover {
+            color: #F59E0B;
+        }
+        .card-hover {
+            transition: transform 500ms ease, box-shadow 500ms ease;
+        }
+        .card-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .social-btn {
+            transition: transform 300ms ease, background-color 300ms ease;
+        }
+        .social-btn:hover {
+            transform: scale(1.1);
+        }
+        .whatsapp-btn {
+            transition: transform 300ms ease, background-color 300ms ease;
+        }
+        .whatsapp-btn:hover {
+            transform: scale(1.1);
+            background-color: #1da750;
+        }
+        .cta-btn {
+            transition: transform 300ms ease, background-color 300ms ease;
+        }
+        .cta-btn:hover {
+            transform: scale(1.1);
+        }
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1.5s forwards;
+        }
+        .slide-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 1s forwards;
+            animation-delay: 0.5s;
+        }
+        .contact-input {
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .contact-input:focus {
+            border-color: #F59E0B;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
+        .form-container {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .contact-info {
+            animation: slideIn 0.8s ease-in-out;
+        }
+        .map-container {
+            animation: fadeIn 1s ease-in-out 0.3s forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Estilos para el menú desplegable profesional */
+        .dropdown-container {
+            position: relative;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #1F2937;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            min-width: 250px;
+            padding: 0.5rem 0;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .dropdown-container:hover .dropdown-menu,
+        .dropdown-container.active .dropdown-menu {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .dropdown-item {
+            padding: 0.75rem 1.5rem;
+            color: #E5E7EB;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: block;
+            white-space: nowrap;
+        }
+        .dropdown-item:hover {
+            background-color: #374151;
+            color: #F59E0B;
+        }
+        .dropdown-menu .dropdown-item:not(:last-child) {
+            border-bottom: 1px solid #4B5563;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .logout-btn {
+            background-color: #EF4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: #DC2626;
+        }
+        .welcome-text {
+            font-size: 0.9rem;
+            color: #E5E7EB;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 w-full bg-gray-800 bg-opacity-90 z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'home' %}" class="text-white font-['Pacifico'] text-2xl">VeriHome</a>
+                <div class="dropdown-container" id="dropdown-container">
+                    <button class="text-white px-4 py-2 font-medium flex items-center" id="dropdown-button">
+                        Menú <i class="ri-arrow-down-s-line ml-1"></i>
+                    </button>
+                    <div class="dropdown-menu" id="dropdown-menu">
+                        {% if user.is_authenticated %}
+                            {% if user.profile_type == 'arrendador' %}
+                                <a href="{% url 'property_create' %}" class="dropdown-item">Subir Propiedad</a>
+                                <a href="{% url 'property_list' %}" class="dropdown-item">Mis Propiedades</a>
+                                <a href="{% url 'contracts' %}" class="dropdown-item">Contratos</a>
+                                <a href="{% url 'inbox' %}" class="dropdown-item">Correo</a>
+                                <a href="{% url 'ratings' %}" class="dropdown-item">Calificaciones</a>
+                                <a href="{% url 'payments' %}" class="dropdown-item">Pagos</a>
+                                <a href="{% url 'documents' %}" class="dropdown-item">Documentos Asociados</a>
+                                <a href="{% url 'resume' %}" class="dropdown-item">Mi Hoja de Vida</a>
+                            {% elif user.profile_type == 'arrendatario' %}
+                                <a href="{% url 'property_list' %}" class="dropdown-item">Propiedades</a>
+                                <a href="#" class="dropdown-item">Mis Arrendamientos</a>
+                                <a href="{% url 'contracts' %}" class="dropdown-item">Contratos</a>
+                                <a href="{% url 'inbox' %}" class="dropdown-item">Correo</a>
+                                <a href="{% url 'ratings' %}" class="dropdown-item">Calificaciones</a>
+                                <a href="{% url 'payments' %}" class="dropdown-item">Pagos</a>
+                                <a href="{% url 'documents' %}" class="dropdown-item">Documentos Asociados</a>
+                                <a href="{% url 'resume' %}" class="dropdown-item">Mi Hoja de Vida</a>
+                            {% elif user.profile_type == 'prestador' %}
+                                <a href="{% url 'resume' %}" class="dropdown-item">Mi Hoja de Vida</a>
+                                <a href="{% url 'contracts' %}" class="dropdown-item">Contratos</a>
+                                <a href="{% url 'inbox' %}" class="dropdown-item">Correo</a>
+                                <a href="{% url 'ratings' %}" class="dropdown-item">Calificaciones</a>
+                                <a href="{% url 'payments' %}" class="dropdown-item">Pagos</a>
+                                <a href="{% url 'documents' %}" class="dropdown-item">Documentos Asociados</a>
+                                <a href="#" class="dropdown-item">Mis Servicios</a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'login' %}" class="dropdown-item">Iniciar Sesión</a>
+                            <a href="{% url 'register' %}" class="dropdown-item">Registrarse</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="nav-right">
+                <a href="{% url 'contact' %}" class="bg-gradient-to-r from-primary to-amber-400 text-white px-4 py-2 rounded-button font-medium hover:from-amber-600 hover:to-amber-500 transition-all duration-300 whitespace-nowrap">Contáctanos</a>
+                <a href="{% url 'news' %}" class="dropdown-item">Noticias</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="logout-btn">Cerrar Sesión</a>
+                    <span class="welcome-text">Bienvenido, {{ user.username }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mensajes de Django -->
+    {% if messages %}
+        <div class="container mx-auto px-4 pt-24 pb-4">
+            {% for message in messages %}
+                <div class="bg-amber-500 text-white p-4 rounded-lg mb-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Contenido Dinámico -->
+    <div class="content min-h-screen pt-24 pb-20">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-8 border-t border-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="montserrat text-xl font-bold mb-4 text-white">Sobre Nosotros</h3>
+                    <p class="text-gray-400">Somos una comunidad inmobiliaria comprometida con la confianza y la seguridad.</p>
+                    <a href="{% url 'about_us' %}" class="text-gray-400 hover:text-primary transition-colors">Leer más</a>
+                </div>
+                <div>
+                    <h3 class="montserrat text-xl font-bold mb-4 text-white">Enlaces Rápidos</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'home' %}" class="text-gray-400 hover:text-primary transition-colors">Inicio</a></li>
+                        <li><a href="{% url 'property_list' %}" class="text-gray-400 hover:text-primary transition-colors">Propiedades</a></li>
+                        <li><a href="{% url 'contact' %}" class="text-gray-400 hover:text-primary transition-colors">Contacto</a></li>
+                        <li><a href="{% url 'privacy_policy' %}" class="text-gray-400 hover:text-primary transition-colors">Política de Privacidad</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="montserrat text-xl font-bold mb-4 text-white">Contacto</h3>
+                    <p class="text-gray-400 mb-2">Calle Principal 123, Madrid, España</p>
+                    <p class="text-gray-400 mb-2">+34 912 345 678</p>
+                    <p class="text-gray-400">info@verihome.com</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-6 text-center">
+                <p class="text-gray-500">© 2025 VeriHome. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.from(".content", { opacity: 0, y: 50, duration: 1, scrollTrigger: ".content" });
+
+            const dropdownContainer = document.getElementById('dropdown-container');
+            const dropdownButton = document.getElementById('dropdown-button');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+
+            if (dropdownContainer && dropdownButton && dropdownMenu) {
+                // Asegurar que el menú comience oculto
+                dropdownMenu.style.display = 'none';
+
+                // Función para abrir el menú
+                const openMenu = () => {
+                    dropdownMenu.style.display = 'block';
+                    gsap.to(dropdownMenu, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        ease: "power2.out"
+                    });
+                    dropdownContainer.classList.add('active');
+                };
+
+                // Función para cerrar el menú
+                const closeMenu = () => {
+                    gsap.to(dropdownMenu, {
+                        opacity: 0,
+                        y: -10,
+                        duration: 0.3,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            dropdownMenu.style.display = 'none';
+                            dropdownContainer.classList.remove('active');
+                        }
+                    });
+                };
+
+                // Hover sobre el contenedor
+                dropdownContainer.addEventListener('mouseenter', openMenu);
+
+                // Salir del contenedor
+                dropdownContainer.addEventListener('mouseleave', closeMenu);
+
+                // Clic para alternar el menú
+                dropdownButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (dropdownContainer.classList.contains('active')) {
+                        closeMenu();
+                    } else {
+                        openMenu();
+                    }
+                });
+            } else {
+                console.error('Elementos dropdown-container, dropdown-button o dropdown-menu no encontrados.');
+            }
+        });
+    </script>
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contáctanos - VeriHome{% endblock %}
+
+{% block content %}
+    <!-- Page Header -->
+    <div class="pt-24 pb-12 bg-gradient-to-r from-amber-500 to-amber-400">
+        <div class="container mx-auto px-4">
+            <h1 class="montserrat text-4xl font-bold text-white text-center">Contáctanos</h1>
+            <p class="text-white text-center mt-4 max-w-2xl mx-auto">Estamos aquí para ayudarte a encontrar tu hogar ideal. No dudes en contactarnos para cualquier consulta o información adicional.</p>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="container mx-auto px-4 py-16">
+        <div class="flex flex-col md:flex-row gap-12">
+            <!-- Contact Form -->
+            <div class="w-full md:w-1/2 form-container">
+                <div class="bg-white rounded-lg shadow-xl p-8">
+                    <h2 class="montserrat text-2xl font-bold mb-6">Envíanos un mensaje</h2>
+                    <form id="contact-form">
+                        <div class="mb-6">
+                            <label for="name" class="block text-gray-700 mb-2 font-medium">Nombre completo</label>
+                            <input type="text" id="name" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none" placeholder="Ingresa tu nombre completo">
+                        </div>
+                        <div class="mb-6">
+                            <label for="email" class="block text-gray-700 mb-2 font-medium">Correo electrónico</label>
+                            <input type="email" id="email" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none" placeholder="Ingresa tu correo electrónico">
+                        </div>
+                        <div class="mb-6">
+                            <label for="phone" class="block text-gray-700 mb-2 font-medium">Teléfono</label>
+                            <input type="tel" id="phone" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none" placeholder="Ingresa tu número de teléfono">
+                        </div>
+                        <div class="mb-6">
+                            <label for="message" class="block text-gray-700 mb-2 font-medium">Mensaje</label>
+                            <textarea id="message" rows="5" class="contact-input w-full px-4 py-3 border border-gray-300 rounded resize-none focus:outline-none" placeholder="¿En qué podemos ayudarte?"></textarea>
+                        </div>
+                        <div class="flex items-center mb-6">
+                            <div class="w-5 h-5 flex items-center justify-center mr-3">
+                                <input type="checkbox" id="privacy" class="opacity-0 absolute h-5 w-5">
+                                <div class="bg-white border border-gray-300 rounded w-5 h-5 flex flex-shrink-0 justify-center items-center focus-within:border-primary">
+                                    <svg class="fill-current hidden w-3 h-3 text-primary pointer-events-none" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
+                                </div>
+                            </div>
+                            <label for="privacy" class="text-sm text-gray-700">Acepto la política de privacidad y el tratamiento de mis datos</label>
+                        </div>
+                        <button type="submit" class="bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-amber-600 transition-colors duration-300 w-full md:w-auto whitespace-nowrap">Enviar mensaje</button>
+                    </form>
+                </div>
+            </div>
+            <!-- Contact Info -->
+            <div class="w-full md:w-1/2 contact-info">
+                <div class="bg-white rounded-lg shadow-xl p-8 h-full">
+                    <h2 class="montserrat text-2xl font-bold mb-6">Información de contacto</h2>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 flex items-center justify-center bg-amber-100 rounded-full mr-4 flex-shrink-0">
+                                <i class="ri-map-pin-line text-primary ri-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-800 mb-1">Dirección</h3>
+                                <p class="text-gray-600">Calle Principal 123, Madrid, España</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 flex items-center justify-center bg-amber-100 rounded-full mr-4 flex-shrink-0">
+                                <i class="ri-phone-line text-primary ri-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-800 mb-1">Teléfono</h3>
+                                <p class="text-gray-600">+34 912 345 678</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 flex items-center justify-center bg-amber-100 rounded-full mr-4 flex-shrink-0">
+                                <i class="ri-mail-line text-primary ri-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-800 mb-1">Correo electrónico</h3>
+                                <p class="text-gray-600">info@verihome.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 flex items-center justify-center bg-amber-100 rounded-full mr-4 flex-shrink-0">
+                                <i class="ri-time-line text-primary ri-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-800 mb-1">Horario de atención</h3>
+                                <p class="text-gray-600">Lunes a Viernes: 9:00 - 18:00</p>
+                                <p class="text-gray-600">Sábados: 10:00 - 14:00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <h3 class="font-medium text-gray-800 mb-4">Síguenos en redes sociales</h3>
+                        <div class="flex space-x-4">
+                            <a href="https://facebook.com" target="_blank" class="social-btn flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full">
+                                <i class="ri-facebook-fill"></i>
+                            </a>
+                            <a href="https://twitter.com" target="_blank" class="social-btn flex items-center justify-center w-10 h-10 bg-blue-400 text-white rounded-full">
+                                <i class="ri-twitter-fill"></i>
+                            </a>
+                            <a href="https://instagram.com" target="_blank" class="social-btn flex items-center justify-center w-10 h-10 bg-gradient-to-tr from-purple-600 to-pink-500 text-white rounded-full">
+                                <i class="ri-instagram-line"></i>
+                            </a>
+                            <a href="https://youtube.com" target="_blank" class="social-btn flex items-center justify-center w-10 h-10 bg-red-600 text-white rounded-full">
+                                <i class="ri-youtube-fill"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="container mx-auto px-4 pb-16 map-container">
+        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+            <iframe class="h-96 w-full" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3037.287228893022!2d-3.703790084594155!3d40.41677597936367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd422997800a3c81%3A0xc4361195b0d5dbfa!2sMadrid%2C%20Spain!5e0!3m2!1sen!2sus!4v1697041234567!5m2!1sen!2sus" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/1234567890?text=Hola,%20quiero%20información%20sobre%20sus%20propiedades!" target="_blank" class="whatsapp-btn fixed bottom-6 right-6 w-16 h-16 flex items-center justify-center bg-[#22C55E] text-white rounded-full shadow-lg z-50">
+        <i class="ri-whatsapp-line ri-2x"></i>
+    </a>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Custom checkbox functionality
+            const checkbox = document.querySelector('#privacy');
+            const checkboxDiv = checkbox.nextElementSibling;
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    checkboxDiv.querySelector('svg').classList.remove('hidden');
+                } else {
+                    checkboxDiv.querySelector('svg').classList.add('hidden');
+                }
+            });
+
+            // Form validation and submission
+            const form = document.querySelector('#contact-form');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.querySelector('#name').value;
+                const email = document.querySelector('#email').value;
+                const phone = document.querySelector('#phone').value;
+                const message = document.querySelector('#message').value;
+                const privacy = document.querySelector('#privacy').checked;
+                let isValid = true;
+
+                if (!name) {
+                    isValid = false;
+                    document.querySelector('#name').classList.add('border-red-500');
+                } else {
+                    document.querySelector('#name').classList.remove('border-red-500');
+                }
+                if (!email || !email.includes('@')) {
+                    isValid = false;
+                    document.querySelector('#email').classList.add('border-red-500');
+                } else {
+                    document.querySelector('#email').classList.remove('border-red-500');
+                }
+                if (!phone) {
+                    isValid = false;
+                    document.querySelector('#phone').classList.add('border-red-500');
+                } else {
+                    document.querySelector('#phone').classList.remove('border-red-500');
+                }
+                if (!message) {
+                    isValid = false;
+                    document.querySelector('#message').classList.add('border-red-500');
+                } else {
+                    document.querySelector('#message').classList.remove('border-red-500');
+                }
+                if (!privacy) {
+                    isValid = false;
+                    checkboxDiv.classList.add('border-red-500');
+                } else {
+                    checkboxDiv.classList.remove('border-red-500');
+                }
+
+                if (isValid) {
+                    // Simulate form submission
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i> Enviando...';
+                    setTimeout(() => {
+                        form.reset();
+                        checkboxDiv.querySelector('svg').classList.add('hidden');
+                        // Show success message
+                        const successMessage = document.createElement('div');
+                        successMessage.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mt-4';
+                        successMessage.innerHTML = '<strong>¡Mensaje enviado!</strong> Nos pondremos en contacto contigo lo antes posible.';
+                        form.appendChild(successMessage);
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Enviar mensaje';
+                        setTimeout(() => {
+                            successMessage.remove();
+                        }, 5000);
+                    }, 1500);
+                }
+            });
+        });
+    </script>
+{% endblock %}

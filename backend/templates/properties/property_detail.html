@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ property.title }} - VeriHome{% endblock %}
+
+{% block content %}
+    <!-- Mensajes de Éxito/Error -->
+    {% if messages %}
+        <div class="container mx-auto px-4 py-4">
+            {% for message in messages %}
+                <div class="rounded-lg p-4 mb-4 {% if message.tags == 'success' %}bg-green-50 text-green-800{% else %}bg-red-50 text-red-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Page Header -->
+    <div class="pt-24 pb-12 bg-gradient-to-r from-primary to-amber-400">
+        <div class="container mx-auto px-4">
+            <h1 class="montserrat text-4xl font-bold text-white text-center">{{ property.title }}</h1>
+            <p class="text-white text-center mt-4 max-w-2xl mx-auto">Detalles completos de esta propiedad en nuestra comunidad inmobiliaria confiable.</p>
+        </div>
+    </div>
+
+    <!-- Property Details -->
+    <div class="container mx-auto px-4 py-16">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <!-- Photos Gallery -->
+            <div class="mb-8">
+                <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Galería de Fotos</h2>
+                {% if property.related_photos.all %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for photo in property.related_photos.all %}
+                            <img src="{{ photo.image.url }}" alt="Foto de {{ property.title }}" class="w-full h-64 object-cover object-center rounded-lg" onerror="this.onerror=null; this.src='{% static "images/no-image.jpg" %}';">
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-700">No hay fotos disponibles.</p>
+                {% endif %}
+            </div>
+
+            <!-- Video -->
+            {% if property.video_url %}
+                <div class="mb-8">
+                    <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Video de la Propiedad</h2>
+                    {% if "youtube.com" in property.video_url or "youtu.be" in property.video_url %}
+                        {% if "youtube.com/watch?v=" in property.video_url %}
+                            {% with video_id=property.video_url|slice:"32:-1" %}
+                                <div class="relative w-full" style="padding-bottom: 28.125%;">
+                                    <iframe class="absolute top-0 left-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/{{ video_id }}?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                </div>
+                            {% endwith %}
+                        {% elif "youtu.be" in property.video_url %}
+                            {% with video_id=property.video_url|slice:"17:-1" %}
+                                <div class="relative w-full" style="padding-bottom: 28.125%;">
+                                    <iframe class="absolute top-0 left-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/{{ video_id }}?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                </div>
+                            {% endwith %}
+                        {% else %}
+                            <p class="text-gray-700">El enlace de YouTube no es válido. Por favor, usa un enlace en formato watch?v= o youtu.be.</p>
+                        {% endif %}
+                    {% elif "vimeo.com" in property.video_url %}
+                        <div class="relative w-full" style="padding-bottom: 28.125%;">
+                            <iframe class="absolute top-0 left-0 w-full h-full rounded-lg" src="{{ property.video_url }}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    {% else %}
+                        <p class="text-gray-700">El enlace del video no es compatible. Por favor, usa un enlace de YouTube o Vimeo.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <!-- Owner Info -->
+            <div class="mb-8">
+                <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Información del Arrendador</h2>
+                <p><strong class="text-gray-900">Publicado por:</strong> {{ property.owner.username }}</p>
+                {% if property.owner.email %}
+                    <p><strong class="text-gray-900">Correo:</strong> {{ property.owner.email }}</p>
+                {% endif %}
+                {% if user.is_authenticated and user.profile_type == 'arrendador' and user == property.owner %}
+                    <a href="{% url 'property_edit' property.id %}" class="bg-blue-500 text-white px-4 py-2 rounded-button font-medium hover:bg-blue-600 transition-colors duration-300 inline-block mt-4">Editar Propiedad</a>
+                {% endif %}
+            </div>
+
+            <!-- Basic Info -->
+            <div class="mb-8">
+                <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Información Básica</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p><strong class="text-gray-900">Ubicación:</strong> {{ property.location }}</p>
+                    <p><strong class="text-gray-900">Precio:</strong> ${{ property.price }} {{ property.currency }}</p>
+                    <p>
+                        <strong class="text-gray-900">Dirección Exacta:</strong>
+                        {% if request.user.is_authenticated and request.user.profile_type == 'arrendatario' %}
+                            {{ property.exact_address|default:"No especificada" }}
+                        {% else %}
+                            <span class="text-gray-700">Inicia sesión como arrendatario para ver la dirección exacta.</span>
+                        {% endif %}
+                    </p>
+                    <p><strong class="text-gray-900">Publicado:</strong> {{ property.created_at|date:'F d, Y H:i' }}</p>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-8">
+                <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Descripción</h2>
+                <p class="text-gray-700">{{ property.description }}</p>
+            </div>
+
+            <!-- Characteristics -->
+            <div class="mb-8">
+                <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Características</h2>
+                <p class="text-gray-700">{{ property.characteristics|default:"No se especificaron características." }}</p>
+            </div>
+
+            <!-- Requirements -->
+            <div class="mb-8">
+                <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Requisitos para Arrendar</h2>
+                <p class="text-gray-700">{{ property.requirements|default:"No se especificaron requisitos." }}</p>
+            </div>
+
+            <!-- Map -->
+            <div class="mb-8">
+                <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Ubicación en el Mapa</h2>
+                {% if property.exact_address %}
+                    <div class="relative w-full h-96 rounded-lg overflow-hidden">
+                        <iframe class="w-full h-full" src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q={{ property.exact_address|urlencode }}" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <!-- Nota: Reemplaza YOUR_API_KEY con tu clave de Google Maps API -->
+                {% else %}
+                    <p class="text-gray-700">No se proporcionó una dirección exacta para mostrar el mapa.</p>
+                {% endif %}
+            </div>
+
+            <!-- Contact Owner -->
+            <div class="text-center">
+                <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">¿Interesado en esta Propiedad?</h2>
+                <a href="{% url 'contact' %}?property={{ property.id }}" class="bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-amber-600 transition-colors duration-300 inline-block">
+                    Contactar al Arrendador
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/1234567890?text=Hola,%20quiero%20información%20sobre%20la%20propiedad:%20{{ property.title }}" target="_blank" class="whatsapp-btn fixed bottom-6 right-6 w-16 h-16 flex items-center justify-center bg-[#22C55E] text-white rounded-full shadow-lg z-50">
+        <i class="ri-whatsapp-line ri-2x"></i>
+    </a>
+{% endblock %}

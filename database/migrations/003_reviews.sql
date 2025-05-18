@@ -1,0 +1,1 @@
+CREATE TABLE reviews (id INTEGER PRIMARY KEY, rating INTEGER);

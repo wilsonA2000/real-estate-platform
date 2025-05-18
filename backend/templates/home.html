@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %} <!-- Asegúrate de cargar el tag static -->
+
+{% block title %}Bienvenido a VeriHome{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <div class="relative w-full h-screen flex items-center justify-center overflow-hidden bg-cover bg-center" style="background-image: url('{% static "images/familia_feliz.jpg" %}');">
+        <div class="absolute inset-0 bg-black opacity-50 z-0"></div>
+        <div class="container mx-auto px-4 z-10 w-full">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="montserrat text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 fade-in">Descubre Tu Hogar Ideal</h1>
+                <p class="text-lg sm:text-xl md:text-2xl text-white mb-8 slide-up">Encuentra el lugar perfecto para vivir con nuestra comunidad confiable</p>
+                <a href="{% url 'how_it_works' %}" class="cta-btn bg-white text-primary px-6 py-3 sm:px-8 sm:py-4 rounded-button font-bold text-base sm:text-lg whitespace-nowrap">Comenzar a Explorar</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Cards -->
+    <div class="container mx-auto px-4 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Properties Card -->
+            <div class="card-hover bg-gray-900 rounded-lg shadow-xl p-8 flex flex-col items-center text-center border border-gray-800">
+                <div class="w-16 h-16 flex items-center justify-center bg-amber-900/30 rounded-full mb-6">
+                    <i class="ri-home-4-line ri-2x text-primary"></i>
+                </div>
+                <h3 class="montserrat text-2xl font-bold mb-4">Propiedades</h3>
+                <p class="text-gray-400 mb-6">Explora nuestra amplia selección de propiedades disponibles en las mejores ubicaciones</p>
+                <a href="{% url 'login' %}" class="text-primary font-medium hover:underline">Inicia Sesión para Ver Propiedades</a>
+            </div>
+            
+            <!-- Login Card -->
+            <div class="card-hover bg-gray-900 rounded-lg shadow-xl p-8 flex flex-col items-center text-center border border-gray-800">
+                <div class="w-16 h-16 flex items-center justify-center bg-amber-900/30 rounded-full mb-6">
+                    <i class="ri-user-line ri-2x text-primary"></i>
+                </div>
+                <h3 class="montserrat text-2xl font-bold mb-4">Iniciar Sesión</h3>
+                <p class="text-gray-400 mb-6">Accede a tu cuenta para explorar propiedades y servicios</p>
+                <a href="{% url 'login' %}" class="text-primary font-medium hover:underline">Iniciar Sesión</a>
+            </div>
+            
+            <!-- Register Card -->
+            <div class="card-hover bg-gray-900 rounded-lg shadow-xl p-8 flex flex-col items-center text-center border border-gray-800">
+                <div class="w-16 h-16 flex items-center justify-center bg-amber-900/30 rounded-full mb-6">
+                    <i class="ri-user-add-line ri-2x text-primary"></i>
+                </div>
+                <h3 class="montserrat text-2xl font-bold mb-4">Registrarse</h3>
+                <p class="text-gray-400 mb-6">Crea una cuenta para personalizar tu experiencia</p>
+                <a href="{% url 'register' %}" class="text-primary font-medium hover:underline">Crear Cuenta</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Media Section -->
+    <div class="bg-gray-900 py-16 border-t border-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="montserrat text-3xl font-bold text-center mb-12 text-white">Conéctate Con Nosotros</h2>
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="https://facebook.com" target="_blank" class="social-btn flex items-center justify-center w-14 h-14 bg-blue-600 text-white rounded-full">
+                    <i class="ri-facebook-fill ri-xl"></i>
+                </a>
+                <a href="https://twitter.com" target="_blank" class="social-btn flex items-center justify-center w-14 h-14 bg-blue-400 text-white rounded-full">
+                    <i class="ri-twitter-fill ri-xl"></i>
+                </a>
+                <a href="https://instagram.com" target="_blank" class="social-btn flex items-center justify-center w-14 h-14 bg-gradient-to-tr from-purple-600 to-pink-500 text-white rounded-full">
+                    <i class="ri-instagram-line ri-xl"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/1234567890?text=Hola,%20quiero%20información%20sobre%20sus%20propiedades!" target="_blank" class="whatsapp-btn fixed bottom-6 right-6 w-16 h-16 flex items-center justify-center bg-[#22C55E] text-white rounded-full shadow-lg z-50">
+        <i class="ri-whatsapp-line ri-2x"></i>
+    </a>
+{% endblock %} <!-- Así es correcto -->

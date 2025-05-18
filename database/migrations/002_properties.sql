@@ -1,0 +1,1 @@
+CREATE TABLE properties (id INTEGER PRIMARY KEY, title VARCHAR(255));

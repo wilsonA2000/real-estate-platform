@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Registro - VeriHome{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-12 sm:px-6 lg:px-8 flex items-center">
+    <div class="max-w-md w-full mx-auto space-y-8 bg-gray-800 p-8 rounded-2xl shadow-xl">
+        <div class="text-center">
+            <h2 class="mt-6 text-3xl font-extrabold text-white montserrat">
+                Crear tu cuenta
+            </h2>
+        </div>
+
+        {% if messages %}
+        <div class="rounded-lg p-4 mb-4">
+            {% for message in messages %}
+                <div class="flex items-center {% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white p-2 rounded">
+                    <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        {% if message.tags == 'error' %}
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        {% else %}
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                        {% endif %}
+                    </svg>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form class="mt-8 space-y-6" method="POST" action="{% url 'register' %}" id="register-form">
+            {% csrf_token %}
+            
+            <div class="space-y-4">
+                <!-- Campo Username -->
+                <div>
+                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-white">
+                        {{ form.username.label }}
+                    </label>
+                    {% render_field form.username class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="Elige un nombre de usuario" %}
+                </div>
+
+                <!-- Campo Name -->
+                <div>
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-white">
+                        {{ form.name.label }}
+                    </label>
+                    {% render_field form.name class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="Ingresa tu nombre completo" %}
+                </div>
+
+                <!-- Campo Email -->
+                <div>
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-white">
+                        {{ form.email.label }}
+                    </label>
+                    {% render_field form.email class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="tu@ejemplo.com" %}
+                </div>
+
+                <!-- Campo Password1 -->
+                <div>
+                    <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium text-white">
+                        {{ form.password1.label }}
+                    </label>
+                    {% render_field form.password1 class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="Crea una contraseña" %}
+                </div>
+
+                <!-- Campo Password2 -->
+                <div>
+                    <label for="{{ form.password2.id_for_label }}" class="block text-sm font-medium text-white">
+                        {{ form.password2.label }}
+                    </label>
+                    {% render_field form.password2 class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="Confirma tu contraseña" %}
+                </div>
+
+                <!-- Campo Profile Type -->
+                <div>
+                    <label for="{{ form.profile_type.id_for_label }}" class="block text-sm font-medium text-white">
+                        {{ form.profile_type.label }}
+                    </label>
+                    {% render_field form.profile_type class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white" %}
+                </div>
+            </div>
+
+            <!-- Checkbox de Términos y Condiciones -->
+            <div class="flex items-center">
+                <input id="terms" name="terms" type="checkbox" required
+                    class="h-4 w-4 text-primary focus:ring-primary border-gray-600 rounded">
+                <label for="terms" class="ml-2 block text-sm text-gray-300">
+                    Acepto los <a href="#" class="text-primary hover:underline">Términos y Condiciones</a>
+                </label>
+            </div>
+
+            <div>
+                <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-amber-500 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Crear Cuenta
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center text-sm text-gray-400">
+            ¿Ya tienes una cuenta? <a href="{% url 'login' %}" class="font-medium text-primary hover:text-amber-500">Inicia sesión aquí</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

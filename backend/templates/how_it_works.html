@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Cómo Funciona VeriHome{% endblock %}
+
+{% block content %}
+    <!-- Who We Are Section -->
+    <div class="container mx-auto px-4 py-16 text-center">
+        <h1 class="montserrat text-4xl font-bold text-white mb-6">Quiénes Somos</h1>
+        <p class="text-xl text-gray-400 mb-8 fade-in">En VeriHome, somos una comunidad que valora la <span class="text-primary">confianza</span>, la <span class="text-primary">honestidad</span> y la <span class="text-primary">seguridad</span>.</p>
+        <p class="text-lg text-gray-400 mb-8 slide-up">Nuestra misión es ser la opción número uno en el mercado inmobiliario, conectando arrendadores, arrendatarios y prestadores de servicios en un entorno seguro y transparente.</p>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="bg-gray-900 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="montserrat text-3xl font-bold text-center mb-12 text-white">Cómo Funciona VeriHome</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Arrendador -->
+                <div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center">
+                    <h3 class="montserrat text-2xl font-bold text-white mb-4">Arrendador</h3>
+                    <p class="text-gray-400 mb-6">Publica tus propiedades, gestiona contratos y recibe pagos de forma segura. Conéctate con arrendatarios verificados y recibe calificaciones.</p>
+                    <div class="flowchart fade-in">
+                        <p class="text-gray-300">1. Publica tu propiedad → 2. Recibe solicitudes → 3. Firma contratos digitales → 4. Gestiona pagos</p>
+                    </div>
+                </div>
+                <!-- Arrendatario -->
+                <div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center">
+                    <h3 class="montserrat text-2xl font-bold text-white mb-4">Arrendatario</h3>
+                    <p class="text-gray-400 mb-6">Encuentra el hogar perfecto, firma contratos digitales y realiza pagos seguros. Evalúa a tu arrendador para mantener la transparencia.</p>
+                    <div class="flowchart slide-up">
+                        <p class="text-gray-300">1. Busca propiedades → 2. Solicita un arrendamiento → 3. Firma contratos → 4. Realiza pagos</p>
+                    </div>
+                </div>
+                <!-- Prestador de Servicios -->
+                <div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center">
+                    <h3 class="montserrat text-2xl font-bold text-white mb-4">Prestador de Servicios</h3>
+                    <p class="text-gray-400 mb-6">Ofrece tus servicios a arrendadores y arrendatarios, gestiona contratos y recibe pagos. Construye tu reputación con calificaciones.</p>
+                    <div class="flowchart fade-in">
+                        <p class="text-gray-300">1. Publica tus servicios → 2. Recibe solicitudes → 3. Firma contratos → 4. Gestiona pagos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1.5s forwards;
+        }
+        .slide-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 1s forwards;
+            animation-delay: 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <script>
+        gsap.from(".flowchart", {
+            opacity: 0,
+            scale: 0.8,
+            duration: 1,
+            stagger: 0.3,
+            scrollTrigger: {
+                trigger: ".flowchart",
+                start: "top 80%"
+            }
+        });
+    </script>
+{% endblock %}

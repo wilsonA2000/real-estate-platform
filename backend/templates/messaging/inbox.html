@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Correo - Bandeja de Entrada - VeriHome{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex h-screen">
+        <!-- Barra Lateral (Estilo Gmail) -->
+        <div class="w-64 bg-gray-800 p-4 rounded-l-2xl shadow-lg">
+            <h2 class="text-xl font-semibold text-white montserrat mb-4">Correo</h2>
+            <ul class="space-y-2">
+                <li><a href="{% url 'inbox' %}" class="block text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">Bandeja de Entrada</a></li>
+                <li><a href="{% url 'sent' %}" class="block text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">Enviados</a></li>
+                <li><a href="{% url 'compose' %}" class="block text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg mt-2">Redactar</a></li>
+            </ul>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="flex-1 ml-4">
+            <h1 class="text-3xl font-bold text-white montserrat mb-6">Bandeja de Entrada</h1>
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <!-- Búsqueda -->
+                <form method="get" class="mb-6">
+                    <div class="flex items-center space-x-4">
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Buscar..." class="w-full p-2 rounded-lg bg-gray-700 text-white">
+                        <button type="submit" class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600">Buscar</button>
+                    </div>
+                </form>
+
+                <!-- Lista de Mensajes -->
+                {% if received_messages %}
+                    <div class="space-y-2">
+                        {% for message in received_messages %}
+                            <a href="{% url 'view_message' message.id %}" class="block bg-gray-700 p-4 rounded-lg hover:bg-gray-600 transition-colors flex justify-between items-center">
+                                <div>
+                                    <p class="text-white font-medium">{{ message.sender.username }}</p>
+                                    <p class="text-gray-300">{{ message.subject }}</p>
+                                    <p class="text-gray-400 truncate">{{ message.body|truncatewords:10 }}</p>
+                                </div>
+                                <span class="text-sm {% if message.is_read %}text-green-500{% else %}text-amber-700{% endif %}">
+                                    {{ message.created_at|date:'d/m/Y H:i' }}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-400 text-center">No tienes correos en tu bandeja de entrada.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

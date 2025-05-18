@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Aprobar Calificaciones - VeriHome{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center text-white montserrat mb-8">Aprobar Calificaciones</h1>
+    <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-2xl shadow-lg">
+        {% if not pending_ratings %}
+            <p class="text-gray-400 text-center">No hay calificaciones pendientes.</p>
+        {% else %}
+            <ul class="space-y-4">
+                {% for rating in pending_ratings %}
+                    <li class="bg-gray-700 p-4 rounded-lg">
+                        <p class="text-white">De: {{ rating.from_user.username }}</p>
+                        <p class="text-gray-300">Para: {{ rating.to_user.username }}</p>
+                        <p class="text-gray-300">Puntuación: {{ rating.score }}/5</p>
+                        <p class="text-gray-400">{{ rating.comment }}</p>
+                        <form method="post" class="mt-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="rating_id" value="{{ rating.id }}">
+                            <button type="submit" name="action" value="approve"
+                                    class="bg-green-500 text-white py-1 px-3 rounded-md mr-2 hover:bg-green-600">
+                                Aprobar
+                            </button>
+                            <button type="submit" name="action" value="reject"
+                                    class="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600">
+                                Rechazar
+                            </button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

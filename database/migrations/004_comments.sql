@@ -1,0 +1,1 @@
+CREATE TABLE comments (id INTEGER PRIMARY KEY, content TEXT);

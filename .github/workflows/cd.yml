@@ -1,0 +1,1 @@
+name: CD\non: [push]\njobs:\n  deploy:\n    runs-on: ubuntu-latest

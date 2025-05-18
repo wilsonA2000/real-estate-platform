@@ -1,0 +1,1 @@
+CREATE TABLE contracts (id INTEGER PRIMARY KEY, title VARCHAR(255));

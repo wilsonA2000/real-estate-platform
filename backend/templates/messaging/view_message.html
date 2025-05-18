@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Correo - Ver Mensaje - VeriHome{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex h-screen">
+        <!-- Barra Lateral (Estilo Gmail) -->
+        <div class="w-64 bg-gray-800 p-4 rounded-l-2xl shadow-lg">
+            <h2 class="text-xl font-semibold text-white montserrat mb-4">Correo</h2>
+            <ul class="space-y-2">
+                <li><a href="{% url 'inbox' %}" class="block text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">Bandeja de Entrada</a></li>
+                <li><a href="{% url 'sent' %}" class="block text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">Enviados</a></li>
+                <li><a href="{% url 'compose' %}" class="block text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg mt-2">Redactar</a></li>
+            </ul>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="flex-1 ml-4">
+            <h1 class="text-3xl font-bold text-white montserrat mb-6">Mensaje</h1>
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <p class="text-white"><strong>De:</strong> {{ message.sender.username }}</p>
+                <p class="text-gray-300"><strong>Asunto:</strong> {{ message.subject }}</p>
+                <p class="text-gray-400"><strong>Fecha:</strong> {{ message.created_at|date:'d/m/Y H:i' }}</p>
+                <div class="mt-4 p-4 bg-gray-700 rounded-lg">
+                    <p class="text-white">{{ message.body|linebreaks }}</p>
+                </div>
+                {% if message.recipient == request.user %}
+                    <a href="{% url 'reply_message' message.id %}" class="mt-4 inline-block bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600">Responder</a>
+                {% endif %}
+                <a href="{% url 'delete_message' message.id %}" class="mt-4 ml-2 inline-block text-red-500 hover:text-red-600" onclick="return confirm('¿Estás seguro de eliminar este mensaje?');">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

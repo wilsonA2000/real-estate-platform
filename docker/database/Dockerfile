@@ -1,0 +1,1 @@
+FROM postgres:15\nENV POSTGRES_DB real_estate\nENV POSTGRES_USER user\nENV POSTGRES_PASSWORD password
