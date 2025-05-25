@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     "apps.community.apps.CommunityConfig",
     "apps.contracts.apps.ContractsConfig",
     "apps.payments.apps.PaymentsConfig",
+    "apps.documents.apps.DocumentsConfig",
+    "apps.resume.apps.ResumeConfig",  # Correcto
+    "apps.news.apps.NewsConfig",  # Asegúrate de que la app de noticias esté incluida
     "real_estate_channels",
     "ai",  # Mantenemos solo 'ai' como aplicación principal
     "webhooks",

@@ -1,6 +1,7 @@
+# apps/payments/urls.py
 from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Define tus rutas aquí (por ahora vacío si no hay vistas)
+    path('', views.payments_list_view, name='payments'),  # Asegúrate de que esta ruta esté definida
 ]

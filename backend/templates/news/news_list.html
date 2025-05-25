@@ -1,0 +1,16 @@
+<!-- apps/news/templates/news/news_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Noticias{% endblock %}
+
+{% block content %}
+    <h1>Últimas Noticias</h1>
+    <ul>
+        {% for article in news %}
+            <li>
+                <h2>{{ article.title }}</h2>
+                <p>{{ article.content }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

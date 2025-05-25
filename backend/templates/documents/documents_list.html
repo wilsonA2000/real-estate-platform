@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Documentos Asociados{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-white">Documentos Asociados</h1>
+        
+        <!-- Aquí puedes colocar una lista de documentos o cualquier información relacionada -->
+        <div class="mt-6">
+            <ul class="space-y-4">
+                {% for document in documents %}
+                    <li class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg text-white">{{ document.name }}</span>
+                            <a href="{{ document.file.url }}" class="text-primary text-sm">Ver Documento</a>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="text-white">No hay documentos disponibles.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

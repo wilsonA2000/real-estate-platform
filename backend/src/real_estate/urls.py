@@ -1,3 +1,4 @@
+# real_estate/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
@@ -83,6 +84,10 @@ urlpatterns = [
     path("payments/", include("apps.payments.urls")),
     path("ai/", include("ai.urls")),
     path("webhooks/", include("webhooks.urls")),
+    # Documents - Se agrega la ruta para la app documents
+    path("documents/", include("apps.documents.urls")),
+    path("resume/", include("apps.resume.urls")),  # Ruta para la app resume
+    path("news/", include("apps.news.urls")),  # Se agrega la ruta para la app news
 ]
 
 # Sirve archivos de media y estáticos en desarrollo
