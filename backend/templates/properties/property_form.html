@@ -4,37 +4,29 @@
 {% block title %}Subir Propiedad - VeriHome{% endblock %}
 
 {% block content %}
-    <!-- Mensajes de Éxito/Error -->
     {% if messages %}
         <div class="container mx-auto px-4 py-4">
             {% for message in messages %}
                 <div class="rounded-lg p-4 mb-4 {% if message.tags == 'success' %}bg-green-50 text-green-800{% else %}bg-red-50 text-red-800{% endif %}">
-                    {% if message.tags == 'success' %}
-                        Subido con éxito
-                    {% else %}
-                        {{ message }}
-                    {% endif %}
+                    {{ message }}
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
-    <!-- Page Header -->
     <div class="pt-24 pb-12 bg-gradient-to-r from-primary to-amber-400">
-        <div class="container mx-auto px-4">
-            <h1 class="montserrat text-4xl font-bold text-white text-center">Subir Nueva Propiedad</h1>
-            <p class="text-white text-center mt-4 max-w-2xl mx-auto">Comparte tu propiedad con nuestra comunidad inmobiliaria confiable.</p>
+        <div class="container mx-auto px-4 text-center text-white">
+            <h1 class="text-4xl font-bold">Subir Nueva Propiedad</h1>
+            <p class="mt-4 max-w-2xl mx-auto">Comparte tu propiedad con nuestra comunidad inmobiliaria confiable.</p>
         </div>
     </div>
 
-    <!-- Form -->
     <div class="container mx-auto px-4 py-16">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-3xl mx-auto">
-            <h2 class="montserrat text-2xl font-bold mb-6 text-gray-900">Detalles de la Propiedad</h2>
-            <form method="post" enctype="multipart/form-data">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Detalles de la Propiedad</h2>
+            <form method="post" enctype="multipart/form-data" id="property-form">
                 {% csrf_token %}
 
-                <!-- Errores Generales del Formulario -->
                 {% if property_form.non_field_errors or photo_formset.non_form_errors %}
                     <div class="rounded-lg bg-red-50 p-4 mb-6">
                         <div class="flex">
@@ -46,97 +38,29 @@
                             <div class="ml-3">
                                 <h3 class="text-sm font-medium text-red-800">Errores en el formulario</h3>
                                 <div class="mt-2 text-sm text-red-700">
-                                    {% for error in property_form.non_field_errors %}
-                                        <p>{{ error }}</p>
-                                    {% endfor %}
-                                    {% for error in photo_formset.non_form_errors %}
-                                        <p>{{ error }}</p>
-                                    {% endfor %}
+                                    {% for error in property_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                                    {% for error in photo_formset.non_form_errors %}<p>{{ error }}</p>{% endfor %}
                                 </div>
                             </div>
                         </div>
                     </div>
                 {% endif %}
 
-                <!-- Campos del PropertyForm -->
-                <div class="mb-6">
-                    <label for="{{ property_form.title.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Título</label>
-                    {% render_field property_form.title class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                    {% for error in property_form.title.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-6">
-                    <label for="{{ property_form.location.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Ubicación</label>
-                    {% render_field property_form.location class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                    {% for error in property_form.location.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-6">
-                    <label for="{{ property_form.exact_address.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Dirección Exacta</label>
-                    {% render_field property_form.exact_address class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                    {% for error in property_form.exact_address.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-6 flex flex-col sm:flex-row gap-4">
-                    <div class="w-full sm:w-2/3">
-                        <label for="{{ property_form.price.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Precio</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-700">$</span>
-                            {% render_field property_form.price class="contact-input w-full pl-8 pr-16 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                            <span id="currency-suffix" class="absolute right-3 top-3 text-gray-700">COP</span>
-                        </div>
-                        {% for error in property_form.price.errors %}
+                <!-- Campos del formulario (generados dinámicamente) -->
+                {% for field in property_form %}
+                    <div class="mb-6">
+                        <label for="{{ field.id_for_label }}" class="block text-gray-700 mb-2 font-medium">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        {% render_field field class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
+                        {% for error in field.errors %}
                             <p class="text-red-600 text-sm mt-1">{{ error }}</p>
                         {% endfor %}
                     </div>
-                    <div class="w-full sm:w-1/3">
-                        <label for="{{ property_form.currency.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Moneda</label>
-                        {% render_field property_form.currency class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" onchange="updateCurrencySuffix(this.value)" %}
-                        {% for error in property_form.currency.errors %}
-                            <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="mb-6">
-                    <label for="{{ property_form.description.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Descripción</label>
-                    {% render_field property_form.description class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" rows="5" %}
-                    {% for error in property_form.description.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-6">
-                    <label for="{{ property_form.property_type.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Tipo de Propiedad</label>
-                    {% render_field property_form.property_type class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                    {% for error in property_form.property_type.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-6">
-                    <label for="{{ property_form.video.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Video de la Propiedad (máximo 3 minutos)</label>
-                    {% render_field property_form.video class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                    {% for error in property_form.video.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-6">
-                    <label for="{{ property_form.characteristics.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Características</label>
-                    {% render_field property_form.characteristics class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" rows="5" %}
-                    {% for error in property_form.characteristics.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-6">
-                    <label for="{{ property_form.requirements.id_for_label }}" class="block text-gray-700 mb-2 font-medium">Requisitos para Arrendar</label>
-                    {% render_field property_form.requirements class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" rows="5" %}
-                    {% for error in property_form.requirements.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
+                {% endfor %}
 
-                <!-- FormSet para Fotos -->
+                <!-- Fotos -->
                 <div class="mb-6">
                     <label class="block text-gray-700 mb-2 font-medium">Fotos</label>
                     {{ photo_formset.management_form }}
@@ -148,21 +72,37 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    {% for error in photo_formset.non_form_errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
                 </div>
 
-                <button type="submit" class="bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-amber-600 transition-colors duration-300 w-full">Publicar Propiedad</button>
+                <!-- Botón de envío -->
+                <button type="submit" class="bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-amber-600 transition-colors duration-300 w-full">
+                    Publicar Propiedad
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- JavaScript para actualizar el sufijo de la moneda -->
     <script>
+        // Cambio dinámico del sufijo de moneda
         function updateCurrencySuffix(currency) {
-            const suffix = document.getElementById('currency-suffix');
-            suffix.textContent = currency;
+            const suffix = document.getElementById("currency-suffix");
+            if (currency === "USD") suffix.textContent = "USD";
+            else if (currency === "EUR") suffix.textContent = "EUR";
+            else suffix.textContent = "COP";
         }
+
+        // Validación del campo de video
+        document.getElementById('property-form').addEventListener('submit', function (e) {
+            const videoInput = document.querySelector('[name="video"]');
+            if (videoInput && videoInput.value) {
+                const isURL = videoInput.value.startsWith("http://") || videoInput.value.startsWith("https://");
+                const isFile = videoInput.files && videoInput.files.length > 0;
+
+                if (!isURL && !isFile) {
+                    e.preventDefault();
+                    alert("Por favor sube un archivo de video o proporciona una URL válida.");
+                }
+            }
+        });
     </script>
 {% endblock %}

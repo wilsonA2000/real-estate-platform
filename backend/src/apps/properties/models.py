@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-
 class InterviewCode(models.Model):
     code = models.CharField(max_length=10, unique=True)
     profile_type = models.CharField(
@@ -28,22 +27,24 @@ class Property(models.Model):
         ("local", "Local"),
         ("habitacion", "Habitación"),
     ]
+
     CURRENCIES = [
         ("COP", "COP"),
         ("USD", "USD"),
     ]
+
     title = models.CharField(max_length=200)
     description = models.TextField()
     location = models.CharField(max_length=200)
     exact_address = models.CharField(max_length=200, blank=True, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, choices=CURRENCIES, default="COP")
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPES)
     video = models.FileField(
         upload_to="property_videos/",
         blank=True,
         null=True,
-        help_text="Video de la propiedad (máximo 3 minutos)",
+        help_text="Video de la propiedad (máximo 3 minutos, formatos .mp4, .mov o .avi)",
     )
     video_url = models.URLField(
         blank=True, null=True, help_text="URL de video alternativa (YouTube o Vimeo)"
@@ -53,6 +54,13 @@ class Property(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="properties")
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+
+    bedrooms = models.PositiveIntegerField(blank=True, null=True)
+    bathrooms = models.PositiveIntegerField(blank=True, null=True)
+    parking_spaces = models.PositiveIntegerField(blank=True, null=True)
+    construction_area = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    land_area = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    main_photo = models.ImageField(upload_to="property_main_photos/", blank=True, null=True)
 
     def __str__(self):
         return self.title

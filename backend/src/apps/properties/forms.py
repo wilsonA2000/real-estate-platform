@@ -3,62 +3,74 @@ from .models import Property, PropertyPhoto
 
 
 class PropertyForm(forms.ModelForm):
+    """
+    Formulario para crear y actualizar propiedades.
+    """
+
     class Meta:
         model = Property
         fields = [
             "title",
             "description",
             "location",
+            "exact_address",
             "price",
+            "currency",
             "property_type",
             "video",
             "video_url",
             "requirements",
-            "exact_address",
-            "currency",
             "characteristics",
+            "bedrooms",
+            "bathrooms",
+            "parking_spaces",
+            "construction_area",
+            "land_area",
+            "main_photo",
         ]
         widgets = {
-            "description": forms.Textarea(attrs={"rows": 5}),
-            "requirements": forms.Textarea(attrs={"rows": 5}),
-            "characteristics": forms.Textarea(attrs={"rows": 5}),
-            "property_type": forms.Select(choices=Property.PROPERTY_TYPES),
+            "description": forms.Textarea(attrs={"rows": 4}),
+            "requirements": forms.Textarea(attrs={"rows": 3}),
+            "characteristics": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["video_url"].required = False
-        self.fields["requirements"].required = False
-        self.fields["exact_address"].required = False
-        self.fields["characteristics"].required = False
-        self.fields["video"].required = False  # Video opcional
+    def clean(self):
+        cleaned_data = super().clean()
 
-    def clean_video(self):
-        video = self.cleaned_data.get("video")
+        video = cleaned_data.get("video")
+        video_url = cleaned_data.get("video_url")
+
+        # Validar que no se proporcionen video y video_url simultáneamente
+        if video and video_url:
+            raise forms.ValidationError(
+                "Solo puede proporcionar un video o una URL de video, no ambos."
+            )
+
+        # Validar tipo de archivo si se carga video
         if video:
-            # Verificar que el archivo sea un video (extensión básica)
-            valid_extensions = [".mp4", ".avi", ".mov"]
-            ext = "." + video.name.split(".")[-1].lower()
-            if ext not in valid_extensions:
-                raise forms.ValidationError(
-                    "Solo se aceptan archivos de video con extensiones .mp4, .avi o .mov."
-                )
-            # Verificar duración (aproximación básica, se puede mejorar con bibliotecas como moviepy)
-            # Nota: Esta validación es limitada sin procesar el archivo; se recomienda usar un backend para precisión
-            max_duration_seconds = 180  # 3 minutos
-            # Aquí solo verificamos el tamaño como aproximación (puedes mejorar esto)
-            if video.size > 50 * 1024 * 1024:  # Límite aproximado de 50MB (ajustable)
-                raise forms.ValidationError(
-                    "El video no debe superar los 3 minutos o 50MB."
-                )
-        return video
+            valid_extensions = [".mp4", ".mov", ".avi"]
+            if not any(video.name.lower().endswith(ext) for ext in valid_extensions):
+                raise forms.ValidationError("El video debe tener formato .mp4, .mov o .avi.")
+
+        return cleaned_data
 
 
 class PropertyPhotoForm(forms.ModelForm):
+    """
+    Formulario para cargar imágenes de las propiedades.
+    """
+
     class Meta:
         model = PropertyPhoto
         fields = ["image"]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["image"].required = False
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+
+        if image:
+            if image.size > 5 * 1024 * 1024:  # Limitar tamaño máximo a 5MB
+                raise forms.ValidationError("La imagen no puede superar los 5 MB.")
+            if not image.content_type or not image.content_type.startswith("image/"):
+                raise forms.ValidationError("El archivo debe ser una imagen válida.")
+
+        return image

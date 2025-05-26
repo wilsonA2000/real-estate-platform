@@ -1,6 +1,6 @@
 from django.views.generic import ListView, DetailView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.forms import formset_factory
 from .models import Property
@@ -30,10 +30,11 @@ class PropertyListView(LoginRequiredMixin, ProfileRequiredMixin, ListView):
     context_object_name = "properties"
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
+        user = self.request.user
+        if user.is_superuser:
             return Property.objects.all()
-        if self.request.user.profile_type == "arrendador":
-            return Property.objects.filter(owner=self.request.user, is_active=True)
+        if user.profile_type == "arrendador":
+            return Property.objects.filter(owner=user, is_active=True)
         return Property.objects.filter(is_active=True)
 
 
@@ -45,12 +46,10 @@ class PropertyDetailView(LoginRequiredMixin, ProfileRequiredMixin, DetailView):
 
 class PropertyCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        if self.request.user.is_superuser:
+        user = self.request.user
+        if user.is_superuser:
             return True
-        return (
-            self.request.user.is_authenticated
-            and self.request.user.profile_type == "arrendador"
-        )
+        return user.is_authenticated and user.profile_type == "arrendador"
 
     def get(self, request):
         property_form = PropertyForm()
@@ -71,28 +70,29 @@ class PropertyCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
         photo_formset = PhotoFormSet(request.POST, request.FILES)
 
         if property_form.is_valid() and photo_formset.is_valid():
-            property = property_form.save(commit=False)
-            property.owner = request.user
-            property.is_active = True
-            property.save()
+            property_obj = property_form.save(commit=False)
+            property_obj.owner = request.user
+            property_obj.is_active = True
+            property_obj.save()
 
             for form in photo_formset:
-                if form.cleaned_data.get("image"):
+                image = form.cleaned_data.get("image")
+                if image:
                     photo = form.save(commit=False)
-                    photo.property = property
+                    photo.property = property_obj
                     photo.save()
 
             messages.success(request, "Propiedad creada exitosamente.")
             return redirect("property_list")
 
-        # Mostrar errores específicos
         for field, errors in property_form.errors.items():
             for error in errors:
                 messages.error(request, f"{property_form.fields[field].label}: {error}")
-        for form in photo_formset:
+
+        for i, form in enumerate(photo_formset):
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"Foto {form.prefix}: {error}")
+                    messages.error(request, f"Foto {i + 1} - {form.fields[field].label}: {error}")
 
         return render(
             request,
@@ -106,18 +106,19 @@ class PropertyCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        if self.request.user.is_superuser:
+        user = self.request.user
+        property_obj = get_object_or_404(Property, pk=self.kwargs.get("pk"))
+        if user.is_superuser:
             return True
-        property = Property.objects.get(pk=self.kwargs["pk"])
         return (
-            self.request.user.is_authenticated
-            and self.request.user.profile_type == "arrendador"
-            and self.request.user == property.owner
+            user.is_authenticated
+            and user.profile_type == "arrendador"
+            and user == property_obj.owner
         )
 
     def get(self, request, pk):
-        property = Property.objects.get(pk=pk)
-        property_form = PropertyForm(instance=property)
+        property_obj = get_object_or_404(Property, pk=pk)
+        property_form = PropertyForm(instance=property_obj)
         PhotoFormSet = formset_factory(PropertyPhotoForm, extra=3)
         photo_formset = PhotoFormSet()
         return render(
@@ -126,35 +127,37 @@ class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
             {
                 "property_form": property_form,
                 "photo_formset": photo_formset,
-                "property": property,
+                "property": property_obj,
             },
         )
 
     def post(self, request, pk):
-        property = Property.objects.get(pk=pk)
-        property_form = PropertyForm(request.POST, request.FILES, instance=property)
+        property_obj = get_object_or_404(Property, pk=pk)
+        property_form = PropertyForm(request.POST, request.FILES, instance=property_obj)
         PhotoFormSet = formset_factory(PropertyPhotoForm, extra=3)
         photo_formset = PhotoFormSet(request.POST, request.FILES)
 
         if property_form.is_valid() and photo_formset.is_valid():
-            property = property_form.save()
+            property_obj = property_form.save()
 
             for form in photo_formset:
-                if form.cleaned_data.get("image"):
+                image = form.cleaned_data.get("image")
+                if image:
                     photo = form.save(commit=False)
-                    photo.property = property
+                    photo.property = property_obj
                     photo.save()
 
             messages.success(request, "Propiedad actualizada exitosamente.")
-            return redirect("property_detail", pk=property.pk)
+            return redirect("property_detail", pk=property_obj.pk)
 
         for field, errors in property_form.errors.items():
             for error in errors:
                 messages.error(request, f"{property_form.fields[field].label}: {error}")
-        for form in photo_formset:
+
+        for i, form in enumerate(photo_formset):
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"Foto {form.prefix}: {error}")
+                    messages.error(request, f"Foto {i + 1} - {form.fields[field].label}: {error}")
 
         return render(
             request,
@@ -162,6 +165,6 @@ class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
             {
                 "property_form": property_form,
                 "photo_formset": photo_formset,
-                "property": property,
+                "property": property_obj,
             },
         )
