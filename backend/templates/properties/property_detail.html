@@ -3,14 +3,263 @@
 
 {% block title %}{{ property.title }} - VeriHome{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" />
+<!-- Fancybox fallback -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" />
+<style>
+    .property-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    .gallery-item {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    .gallery-item:hover {
+        transform: scale(1.03);
+    }
+    .gallery-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .modern-video-frame {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%);
+        border-radius: 24px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+        border: 2.5px solid #e5e7eb;
+        padding: 2.5rem 2rem 2rem 2rem;
+        margin: 2.5rem auto 0 auto;
+        max-width: 980px;
+        min-width: 340px;
+        transition: box-shadow 0.3s;
+        position: relative;
+        animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .modern-video-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        letter-spacing: 0.01em;
+    }
+    .modern-video-header i {
+        font-size: 2rem;
+        color: #6366f1;
+        vertical-align: middle;
+    }
+    .modern-video-preview {
+        width: 900px;
+        height: 506px;
+        max-width: 100%;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        background: #18181b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #c7d2fe;
+        margin: 0 auto;
+        position: relative;
+    }
+    .modern-video-preview .plyr,
+    .modern-video-preview iframe,
+    .modern-video-preview video {
+        border-radius: 18px !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 320px;
+        min-height: 180px;
+        max-width: 100%;
+        max-height: 100%;
+        background: #18181b;
+        display: block;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .property-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    .detail-icon {
+        color: #F59E0B;
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
+    }
+    .map-container {
+        position: relative;
+        height: 400px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .contact-form-container {
+        background-color: #f9fafb;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        min-width: 180px;
+        font-size: 16px;
+        font-family: 'Roboto', sans-serif;
+    }
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .action-button i {
+        margin-right: 0.5rem;
+        font-size: 1.25rem;
+    }
+    .edit-button {
+        background-color: #F59E0B;
+        color: white;
+    }
+    .edit-button:hover {
+        background-color: #D97706;
+    }
+    .delete-button {
+        background-color: #EF4444;
+        color: white;
+    }
+    .delete-button:hover {
+        background-color: #DC2626;
+    }
+    /* Estilos para el modal de confirmación */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-overlay.active {
+        display: flex;
+    }
+    .modal-container {
+        background-color: #1F2937;
+        border-radius: 0.75rem;
+        width: 90%;
+        max-width: 500px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        transform: translateY(-20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    .modal-overlay.active .modal-container {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    .modal-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    .modal-icon {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+    .modal-title {
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .modal-body {
+        color: #D1D5DB;
+        margin-bottom: 1.5rem;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+    .modal-button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .modal-cancel {
+        background-color: #374151;
+        color: white;
+    }
+    .modal-cancel:hover {
+        background-color: #4B5563;
+    }
+    .modal-confirm {
+        background-color: #EF4444;
+        color: white;
+    }
+    .modal-confirm:hover {
+        background-color: #DC2626;
+    }
+</style>
+{% endblock %}
 
+{% block content %}
 <!-- Mensajes -->
 {% if messages %}
 <div class="container mx-auto px-4 py-4">
     {% for message in messages %}
-    <div class="rounded-lg p-4 mb-4 {% if message.tags == 'success' %}bg-green-50 text-green-800{% else %}bg-red-50 text-red-800{% endif %}">
-        {{ message }}
+    <div class="rounded-lg p-4 mb-4 {% if message.tags == 'success' %}bg-green-50 text-green-800{% elif message.tags == 'success safe' %}bg-green-50 text-green-800{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-800{% else %}bg-red-50 text-red-800{% endif %}">
+        {% if 'safe' in message.tags %}
+            {{ message|safe }}
+        {% else %}
+            {{ message }}
+        {% endif %}
     </div>
     {% endfor %}
 </div>
@@ -24,146 +273,270 @@
     </div>
 </div>
 
-<!-- Contenido principal -->
+<!-- Resto del contenido (se mantiene igual) -->
 <div class="container mx-auto px-4 py-16">
     <div class="bg-white rounded-lg shadow-xl p-8 space-y-12">
-
-        <!-- Galería de Fotos -->
+        <!-- Galería de Fotos con Lightbox -->
         <section>
             <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Galería de Fotos</h2>
-            {% if property.related_photos.all %}
-            <div id="gallery" class="relative">
-                <div class="main-image mb-4">
-                    <img id="currentImage" src="{{ property.related_photos.all.0.image.url }}" alt="Foto de {{ property.title }}" class="w-full h-96 object-cover rounded-lg cursor-zoom-in transition-transform duration-300" />
-                </div>
-                <div class="flex space-x-4 overflow-x-auto">
-                    {% for photo in property.related_photos.all %}
-                    <img src="{{ photo.image.url }}" alt="Miniatura de {{ property.title }}" class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-amber-500 transition-all duration-300" onclick="changeImage(this)" />
-                    {% endfor %}
-                </div>
+            {% if photos %}
+            <div class="property-gallery">
+                {% for photo in photos %}
+                <a href="{{ photo.image.url }}" data-fancybox="gallery" data-caption="{{ property.title }}" class="gallery-item">
+                    <img src="{{ photo.image.url }}" alt="Foto de {{ property.title }}" class="gallery-image">
+                </a>
+                {% empty %}
+                <p class="text-gray-700">No hay fotos disponibles.</p>
+                {% endfor %}
             </div>
             {% else %}
             <p class="text-gray-700">No hay fotos disponibles.</p>
             {% endif %}
         </section>
 
-        <!-- Video de la propiedad -->
-        {% if property.video %}
+        <!-- Video -->
         <section>
-            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Video de la Propiedad</h2>
-            <video controls class="w-full rounded-lg max-h-96">
-                <source src="{{ property.video.url }}" type="video/mp4" />
-                Tu navegador no soporta la reproducción de video.
-            </video>
-        </section>
-        {% elif property.video_url %}
-        <section>
-            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Video de la Propiedad</h2>
-            {% if "youtube.com" in property.video_url or "youtu.be" in property.video_url %}
-                {% if "watch?v=" in property.video_url %}
-                    {% with property.video_url|slice:"https://www.youtube.com/watch?v=" as video_id %}
-                    <div class="relative w-full" style="padding-bottom: 56.25%;">
-                        <iframe class="absolute top-0 left-0 w-full h-full rounded-lg"
-                            src="https://www.youtube.com/embed/{{ video_id }}?rel=0"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen>
-                        </iframe>
-                    </div>
-                    {% endwith %}
-                {% elif "youtu.be" in property.video_url %}
-                    {% with video_id=property.video_url|cut:"https://youtu.be/" %}
-                    <div class="relative w-full" style="padding-bottom: 56.25%;">
-                        <iframe class="absolute top-0 left-0 w-full h-full rounded-lg"
-                            src="https://www.youtube.com/embed/{{ video_id }}?rel=0"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen>
-                        </iframe>
-                    </div>
-                    {% endwith %}
-                {% else %}
-                <p class="text-gray-700">El enlace de YouTube no es válido. Use un formato adecuado.</p>
-                {% endif %}
-            {% elif "vimeo.com" in property.video_url %}
-            <div class="relative w-full" style="padding-bottom: 56.25%;">
-                <iframe class="absolute top-0 left-0 w-full h-full rounded-lg"
-                    src="{{ property.video_url }}"
-                    frameborder="0"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
+            <div class="modern-video-frame">
+                <div class="modern-video-header">
+                    <i class="ri-movie-2-line"></i>
+                    <span>Video de la Propiedad</span>
+                </div>
+                <div class="modern-video-preview">
+                    {% if property.video %}
+                        <video id="property-video" playsinline controls data-poster="{% if property.main_photo %}{{ property.main_photo.url }}{% endif %}" style="width:100%;max-width:900px;display:block;margin:auto;">
+                            <source src="{{ property.video.url }}" type="video/mp4" />
+                            Tu navegador no soporta la reproducción de video.
+                        </video>
+                    {% elif property.video_url %}
+                        {% if "youtube.com" in property.video_url or "youtu.be" in property.video_url %}
+                            {% if "watch?v=" in property.video_url %}
+                                {% with video_id=property.video_url|cut:"https://www.youtube.com/watch?v=" %}
+                                <div id="property-video" data-plyr-provider="youtube" data-plyr-embed-id="{{ video_id|cut:"&" }}" style="width:100%;max-width:900px;margin:auto;"></div>
+                                {% endwith %}
+                            {% elif "youtu.be" in property.video_url %}
+                                {% with video_id=property.video_url|cut:"https://youtu.be/" %}
+                                <div id="property-video" data-plyr-provider="youtube" data-plyr-embed-id="{{ video_id|cut:"?" }}" style="width:100%;max-width:900px;margin:auto;"></div>
+                                {% endwith %}
+                            {% else %}
+                            <p class="text-gray-700">El enlace de YouTube no es válido. Use un formato adecuado.</p>
+                            {% endif %}
+                        {% elif "vimeo.com" in property.video_url %}
+                            {% with video_id=property.video_url|cut:"https://vimeo.com/" %}
+                            <div id="property-video" data-plyr-provider="vimeo" data-plyr-embed-id="{{ video_id|cut:"?" }}" style="width:100%;max-width:900px;margin:auto;"></div>
+                            {% endwith %}
+                        {% else %}
+                        <p class="text-gray-700">El enlace del video no es compatible. Use YouTube o Vimeo.</p>
+                        {% endif %}
+                    {% else %}
+                        <div class="flex flex-col items-center justify-center py-8">
+                            <i class="ri-movie-line text-5xl text-gray-300 mb-2"></i>
+                            <p class="text-gray-500">No hay video disponible para esta propiedad.</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-            {% else %}
-            <p class="text-gray-700">El enlace del video no es compatible. Use YouTube o Vimeo.</p>
-            {% endif %}
+        </section>
+
+        <!-- Información básica -->
+        <section class="bg-gray-50 p-6 rounded-lg shadow-sm">
+            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Detalles de la Propiedad</h2>
+            <div class="property-details-grid">
+                <div>
+                    <ul class="space-y-3 text-gray-800">
+                        <li class="detail-item"><i class="ri-money-dollar-circle-line detail-icon"></i><strong class="mr-2">Precio:</strong> {{ property.price|floatformat:0 }} {{ property.currency }}</li>
+                        <li class="detail-item"><i class="ri-home-4-line detail-icon"></i><strong class="mr-2">Tipo de propiedad:</strong> {{ property.get_property_type_display }}</li>
+                        <li class="detail-item"><i class="ri-building-line detail-icon"></i><strong class="mr-2">Área construida:</strong> {{ property.construction_area|default:"No especificada" }} m²</li>
+                        <li class="detail-item"><i class="ri-landscape-line detail-icon"></i><strong class="mr-2">Área total:</strong> {{ property.land_area|default:"No especificada" }} m²</li>
+                        <li class="detail-item"><i class="ri-map-pin-line detail-icon"></i><strong class="mr-2">Ubicación:</strong> {{ property.location }}</li>
+                    </ul>
+                </div>
+                <div>
+                    <ul class="space-y-3 text-gray-800">
+                        <li class="detail-item"><i class="ri-hotel-bed-line detail-icon"></i><strong class="mr-2">Habitaciones:</strong> {{ property.bedrooms|default:"No especificado" }}</li>
+                        <li class="detail-item"><i class="ri-shower-line detail-icon"></i><strong class="mr-2">Baños:</strong> {{ property.bathrooms|default:"No especificado" }}</li>
+                        <li class="detail-item"><i class="ri-parking-box-line detail-icon"></i><strong class="mr-2">Parqueaderos:</strong> {{ property.parking_spaces|default:"No especificado" }}</li>
+                        <li class="detail-item"><i class="ri-calendar-line detail-icon"></i><strong class="mr-2">Publicado:</strong> {{ property.created_at|date:"d/m/Y" }}</li>
+                        <li class="detail-item"><i class="ri-user-line detail-icon"></i><strong class="mr-2">Propietario:</strong> {{ property.owner.name|default_if_none:"No especificado" }}</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Descripción -->
+        <section>
+            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Descripción</h2>
+            <div class="prose max-w-none text-gray-700">
+                <p>{{ property.description|linebreaks }}</p>
+            </div>
+        </section>
+
+        <!-- Características -->
+        {% if property.characteristics %}
+        <section>
+            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Características</h2>
+            <div class="prose max-w-none text-gray-700">
+                <p>{{ property.characteristics|linebreaks }}</p>
+            </div>
         </section>
         {% endif %}
 
-        <!-- Información básica -->
+        <!-- Requisitos -->
+        {% if property.requirements %}
         <section>
-            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Detalles de la Propiedad</h2>
-            <ul class="space-y-2 text-gray-800">
-                <li><strong>Precio:</strong> {{ property.price|floatformat:0 }} {{ property.price_type }}</li>
-                <li><strong>Tipo de propiedad:</strong> {{ property.property_type }}</li>
-                <li><strong>Estado:</strong> {{ property.property_status }}</li>
-                <li><strong>Área construida:</strong> {{ property.construction_area }} m²</li>
-                <li><strong>Área total:</strong> {{ property.land_area }} m²</li>
-                <li><strong>Habitaciones:</strong> {{ property.bedrooms }}</li>
-                <li><strong>Baños:</strong> {{ property.bathrooms }}</li>
-                <li><strong>Parqueaderos:</strong> {{ property.parking_spaces }}</li>
-                <li><strong>Dirección exacta:</strong> {{ property.exact_address }}</li>
-            </ul>
+            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Requisitos</h2>
+            <div class="prose max-w-none text-gray-700">
+                <p>{{ property.requirements|linebreaks }}</p>
+            </div>
         </section>
+        {% endif %}
 
-        <!-- Mapa -->
-        {% if property.exact_address %}
+        <!-- Mapa usando Mapbox como en el formulario de propiedad -->
+        {% if property.latitude and property.longitude %}
+        <section class="mt-12">
+            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Ubicación exacta</h2>
+            {% if property.exact_address %}
+            <p class="text-gray-700 mb-2"><strong>Dirección:</strong> {{ property.exact_address }}</p>
+            {% endif %}
+            <p class="text-gray-700 mb-4"><strong>Coordenadas:</strong> {{ property.latitude }}, {{ property.longitude }}</p>
+            <div class="container mx-auto pb-4 map-container">
+                <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+                    <div id="mapbox-detail-map" style="height: 350px; border-radius: 8px;"></div>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+        
+        <!-- Botones de acción para el propietario -->
+        {% if user == property.owner %}
         <section>
-            <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Ubicación en el mapa</h2>
-            <div class="relative w-full h-96 rounded-lg overflow-hidden">
-                <iframe
-                    class="w-full h-full"
-                    src="https://www.google.com/maps/embed/v1/place?key={{ GOOGLE_MAPS_API_KEY }}&q={{ property.exact_address|urlencode }}"
-                    allowfullscreen
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
+            <div class="action-buttons">
+                <a href="{% url 'property_edit' property.id %}" class="action-button edit-button">
+                    <i class="ri-edit-line"></i> Editar propiedad
+                </a>
+                <a href="#" id="delete-property-btn" class="action-button delete-button">
+                    <i class="ri-delete-bin-line"></i> Eliminar propiedad
+                </a>
             </div>
         </section>
         {% endif %}
     </div>
 </div>
 
-<!-- Botón WhatsApp -->
-<a href="https://wa.me/1234567890?text=Hola,%20quiero%20información%20sobre%20la%20propiedad:%20{{ property.title|urlencode }}"
+<!-- Modal de confirmación para eliminar propiedad -->
+<div id="delete-modal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-icon">
+                <i class="ri-error-warning-line"></i>
+            </div>
+            <h3 class="modal-title">Confirmar eliminación</h3>
+        </div>
+        <div class="modal-body">
+            <p>¿Estás seguro de que deseas eliminar la propiedad <strong>"{{ property.title }}"</strong>?</p>
+            <p class="mt-2">Esta acción no se puede deshacer y eliminará todos los datos asociados a esta propiedad.</p>
+        </div>
+        <div class="modal-footer">
+            <button id="cancel-delete" class="modal-button modal-cancel">Cancelar</button>
+            <form id="delete-form-{{ property.id }}" method="POST" action="{% url 'property_delete' property.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="modal-button modal-confirm">Eliminar propiedad</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- WhatsApp -->
+<a href="https://wa.me/{{ property.owner.phone|default:'1234567890' }}?text=Hola,%20quiero%20información%20sobre%20la%20propiedad:%20{{ property.title|urlencode }}"
     target="_blank"
     class="whatsapp-btn fixed bottom-6 right-6 w-16 h-16 flex items-center justify-center bg-[#22C55E] text-white rounded-full shadow-lg z-50">
     <i class="ri-whatsapp-line ri-2x"></i>
 </a>
 
-<!-- Scripts -->
-<script>
-    function changeImage(element) {
-        const mainImage = document.getElementById('currentImage');
-        mainImage.src = element.src;
-    }
+{% endblock %}
 
-    document.getElementById('currentImage').addEventListener('click', function () {
-        const image = this;
-        const zoomIn = image.classList.contains('cursor-zoom-in');
-        image.classList.toggle('cursor-zoom-in', !zoomIn);
-        image.classList.toggle('cursor-zoom-out', zoomIn);
-        image.style.transform = zoomIn ? 'scale(2)' : 'scale(1)';
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<!-- Fancybox fallback -->
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar Fancybox para la galería
+        Fancybox.bind("[data-fancybox='gallery']", {
+            closeButton: true,
+            loop: true,
+            Toolbar: {
+                display: {
+                    left: ["infobar"],
+                    middle: ["zoomIn", "zoomOut", "toggle1to1", "rotateCCW", "rotateCW"],
+                    right: ["slideshow", "fullscreen", "thumbs", "close"],
+                },
+            },
+            Navigation: {
+                prevTpl: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>',
+                nextTpl: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+            },
+        });
+        // Inicializar reproductor de video con Plyr
+        setTimeout(function() {
+            const videoElement = document.getElementById('property-video');
+            if (videoElement) {
+                new Plyr(videoElement, {
+                    controls: [
+                        'play-large', 'play', 'progress', 'current-time', 'mute', 
+                        'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
+                    ],
+                    settings: ['captions', 'quality', 'speed'],
+                    iconUrl: 'https://cdn.plyr.io/3.7.8/plyr.svg',
+                    blankVideo: 'https://cdn.plyr.io/static/blank.mp4',
+                    autoplay: false,
+                    hideControls: false,
+                    keyboard: { focused: true, global: false },
+                    tooltips: { controls: true, seek: true },
+                });
+            }
+        }, 200);
+        // Inicializar Mapbox para mostrar la ubicación
+        mapboxgl.accessToken = 'pk.eyJ1Ijoid2lsc29uYXJndWVsbG8yMDI1IiwiYSI6ImNtYm1zcmg1aDE0NTkyam9rZDRkNzF5YWoifQ.FgvTtKt3AK5uxcoz8BHtmw';
+        const mapElement = document.getElementById('mapbox-detail-map');
+        if (mapElement) {
+            const lat = {{ property.latitude|default:'null' }};
+            const lng = {{ property.longitude|default:'null' }};
+            if (lat && lng) {
+                const map = new mapboxgl.Map({
+                    container: 'mapbox-detail-map',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: [lng, lat],
+                    zoom: 15,
+                    locale: 'es-ES'
+                });
+                map.addControl(new mapboxgl.NavigationControl());
+                new mapboxgl.Marker()
+                    .setLngLat([lng, lat])
+                    .addTo(map);
+            }
+        }
+        // Modal de confirmación para eliminar propiedad
+        const deleteBtn = document.getElementById('delete-property-btn');
+        const deleteModal = document.getElementById('delete-modal');
+        const cancelBtn = document.getElementById('cancel-delete');
+        if (deleteBtn && deleteModal && cancelBtn) {
+            deleteBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                deleteModal.classList.add('active');
+            });
+            cancelBtn.addEventListener('click', function() {
+                deleteModal.classList.remove('active');
+            });
+            // Cerrar modal al hacer clic fuera
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    deleteModal.classList.remove('active');
+                }
+            });
+        }
     });
 </script>
-
-<style>
-    #currentImage.cursor-zoom-in {
-        cursor: zoom-in;
-    }
-    #currentImage.cursor-zoom-out {
-        cursor: zoom-out;
-    }
-</style>
-
 {% endblock %}

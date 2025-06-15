@@ -1,6 +1,74 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+import random
+import string
+
+
+class InterviewCode(models.Model):
+    """
+    Modelo para los códigos de entrevista que se requieren para el registro.
+    """
+    code = models.CharField(
+        max_length=10, 
+        unique=True, 
+        verbose_name=_("Código de entrevista")
+    )
+    profile_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("arrendador", "Arrendador"),
+            ("arrendatario", "Arrendatario"),
+            ("prestador", "Prestador de Servicios"),
+        ],
+        verbose_name=_("Tipo de perfil")
+    )
+    rating = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name=_("Calificación inicial"),
+        help_text=_("Calificación de 1 a 5 asignada por el administrador")
+    )
+    is_used = models.BooleanField(
+        default=False,
+        verbose_name=_("Utilizado"),
+        help_text=_("Indica si el código ya ha sido utilizado para registrarse")
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Fecha de creación")
+    )
+    created_by = models.ForeignKey(
+        'CustomUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_codes",
+        verbose_name=_("Creado por")
+    )
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Notas"),
+        help_text=_("Notas adicionales sobre la entrevista")
+    )
+
+    class Meta:
+        verbose_name = _("Código de entrevista")
+        verbose_name_plural = _("Códigos de entrevista")
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.code} - {self.get_profile_type_display()}"
+    
+    @classmethod
+    def generate_code(cls):
+        """
+        Genera un código único de 8 caracteres alfanuméricos.
+        """
+        while True:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            if not cls.objects.filter(code=code).exists():
+                return code
 
 
 class CustomUser(AbstractUser):
@@ -61,6 +129,26 @@ class CustomUser(AbstractUser):
         blank=True,
         null=True,
         help_text=_("Información de la hoja de vida"),
+    )
+    is_verified = models.BooleanField(
+        _("verificado"),
+        default=False,
+        help_text=_("Indica si el usuario ha sido verificado por un administrador")
+    )
+    verification_date = models.DateTimeField(
+        _("fecha de verificación"),
+        null=True,
+        blank=True,
+        help_text=_("Fecha en que el usuario fue verificado")
+    )
+    verified_by = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="verified_users",
+        verbose_name=_("Verificado por"),
+        help_text=_("Administrador que verificó al usuario")
     )
 
     # Configuraciones

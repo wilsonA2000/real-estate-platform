@@ -1,0 +1,16 @@
+<!-- templates/properties/contact_request_form.html -->
+
+<form method="post" class="space-y-4 mt-6">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="mb-4">
+        <label for="message" class="block text-sm font-medium text-gray-700">Mensaje</label>
+        {{ form.message|as_widget }}
+        {% if form.message.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.message.errors.0 }}</p>
+        {% endif %}
+    </div>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        Enviar solicitud de contacto
+    </button>
+</form>

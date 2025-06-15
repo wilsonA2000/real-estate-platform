@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}VeriHome{% endblock %}</title>
+    {% load static %}
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
         tailwind.config = {
@@ -34,6 +35,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
+    <!-- Añadimos FancyBox para el Lightbox -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+    {% block extra_css %}{% endblock %}
     <style>
         :where([class^="ri-"])::before { content: "\f3c2"; }
         body {
@@ -180,6 +186,55 @@
             font-size: 0.9rem;
             color: #E5E7EB;
         }
+        /* Estilos para FancyBox */
+        .fancybox__container {
+            --fancybox-bg: rgba(0, 0, 0, 0.95);
+        }
+        .fancybox__toolbar {
+            --fancybox-color: #fff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem;
+        }
+        .fancybox__nav {
+            --fancybox-color: #fff;
+            --fancybox-hover-color: #F59E0B;
+        }
+        .fancybox__nav .carousel__button {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            transition: background-color 0.3s ease;
+        }
+        .fancybox__nav .carousel__button:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        /* Estilos para notificaciones */
+        #notifications-dropdown {
+            width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background-color: #1F2937;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        #notifications-dropdown.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .notification-item.unread {
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+        .notification-badge {
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
@@ -231,6 +286,47 @@
             <div class="nav-right">
                 <a href="{% url 'contact' %}" class="bg-gradient-to-r from-primary to-amber-400 text-white px-4 py-2 rounded-button font-medium hover:from-amber-600 hover:to-amber-500 transition-all duration-300 whitespace-nowrap">Contáctanos</a>
                 <a href="{% url 'news' %}" class="dropdown-item">Noticias</a>
+                
+                <!-- Componente de Notificaciones -->
+                {% if user.is_authenticated %}
+                <div class="relative ml-4">
+                    <button id="notifications-btn" class="text-white p-2 rounded-full hover:bg-gray-700 relative">
+                        <i class="ri-notification-3-line text-xl"></i>
+                        {% if user.notifications.all %}
+                            <span class="absolute notification-badge bg-red-500 text-white rounded-full flex items-center justify-center">
+                                {{ user.notifications.all|length }}
+                            </span>
+                        {% endif %}
+                    </button>
+                    
+                    <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 bg-gray-800 rounded-md shadow-lg z-50">
+                        <div class="p-3 border-b border-gray-700">
+                            <h3 class="text-lg font-semibold text-white">Notificaciones</h3>
+                        </div>
+                        <div class="max-h-96 overflow-y-auto">
+                            {% with notifications=user.notifications.all|slice:":10" %}
+                                {% if notifications %}
+                                    {% for notification in notifications %}
+                                        <a href="{{ notification.url }}" class="notification-item block p-4 border-b border-gray-700 hover:bg-gray-700 {% if not notification.is_read %}unread{% endif %}" data-notification-id="{{ notification.id }}">
+                                            <p class="font-semibold text-white">{{ notification.title }}</p>
+                                            <p class="text-gray-300 text-sm">{{ notification.message }}</p>
+                                            <p class="text-gray-400 text-xs mt-1">{{ notification.created_at|timesince }} atrás</p>
+                                        </a>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="p-4 text-center text-gray-400">
+                                        No tienes notificaciones
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="p-3 border-t border-gray-700 text-center">
+                            <a href="#" class="text-amber-500 hover:text-amber-400 text-sm">Ver todas las notificaciones</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
                 {% if user.is_authenticated %}
                     <a href="{% url 'logout' %}" class="logout-btn">Cerrar Sesión</a>
                     <span class="welcome-text">Bienvenido, {{ user.username }}</span>
@@ -288,10 +384,8 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            gsap.registerPlugin(ScrollTrigger);
-            gsap.from(".content", { opacity: 0, y: 50, duration: 1, scrollTrigger: ".content" });
-
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menú principal
             const dropdownContainer = document.getElementById('dropdown-container');
             const dropdownButton = document.getElementById('dropdown-button');
             const dropdownMenu = document.getElementById('dropdown-menu');
@@ -300,7 +394,6 @@
                 // Asegurar que el menú comience oculto
                 dropdownMenu.style.display = 'none';
 
-                // Función para abrir el menú
                 const openMenu = () => {
                     dropdownMenu.style.display = 'block';
                     gsap.to(dropdownMenu, {
@@ -312,7 +405,6 @@
                     dropdownContainer.classList.add('active');
                 };
 
-                // Función para cerrar el menú
                 const closeMenu = () => {
                     gsap.to(dropdownMenu, {
                         opacity: 0,
@@ -326,13 +418,8 @@
                     });
                 };
 
-                // Hover sobre el contenedor
                 dropdownContainer.addEventListener('mouseenter', openMenu);
-
-                // Salir del contenedor
                 dropdownContainer.addEventListener('mouseleave', closeMenu);
-
-                // Clic para alternar el menú
                 dropdownButton.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (dropdownContainer.classList.contains('active')) {
@@ -341,12 +428,88 @@
                         openMenu();
                     }
                 });
-            } else {
-                console.error('Elementos dropdown-container, dropdown-button o dropdown-menu no encontrados.');
+            }
+
+            // Notificaciones
+            const notificationsBtn = document.getElementById('notifications-btn');
+            const notificationsDropdown = document.getElementById('notifications-dropdown');
+
+            if (notificationsBtn && notificationsDropdown) {
+                // Asegurar que el dropdown comience oculto
+                notificationsDropdown.style.display = 'none';
+
+                const openNotifications = () => {
+                    notificationsDropdown.style.display = 'block';
+                    gsap.to(notificationsDropdown, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        ease: "power2.out",
+                        onStart: () => {
+                            notificationsDropdown.classList.add('active');
+                        }
+                    });
+                };
+
+                const closeNotifications = () => {
+                    gsap.to(notificationsDropdown, {
+                        opacity: 0,
+                        y: -10,
+                        duration: 0.3,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            notificationsDropdown.style.display = 'none';
+                            notificationsDropdown.classList.remove('active');
+                        }
+                    });
+                };
+
+                notificationsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (notificationsDropdown.classList.contains('active')) {
+                        closeNotifications();
+                    } else {
+                        openNotifications();
+                    }
+                });
+
+                // Cerrar al hacer clic fuera
+                document.addEventListener('click', (event) => {
+                    if (!notificationsDropdown.contains(event.target) && event.target !== notificationsBtn) {
+                        closeNotifications();
+                    }
+                });
+
+                // Marcar notificación como leída al hacer clic
+                document.querySelectorAll('.notification-item').forEach(item => {
+                    item.addEventListener('click', async (e) => {
+                        const notificationId = item.getAttribute('data-notification-id');
+                        try {
+                            const response = await fetch(`/notifications/mark-as-read/${notificationId}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+                            if (response.ok) {
+                                item.classList.remove('unread');
+                                const badge = notificationsBtn.querySelector('.notification-badge');
+                                const currentCount = parseInt(badge?.textContent || '0');
+                                if (currentCount > 1) {
+                                    badge.textContent = (currentCount - 1).toString();
+                                } else {
+                                    badge?.remove();
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error marcando notificación como leída:', error);
+                        }
+                    });
+                });
             }
         });
     </script>
-    {% block extra_js %}
-    {% endblock %}
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

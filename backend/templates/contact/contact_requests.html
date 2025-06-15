@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Solicitudes de Contacto - VeriHome{% endblock %}
+
+{% block extra_css %}
+<style>
+    .request-card {
+        transition: all 0.2s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .request-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .request-card.unread {
+        border-left-color: #F59E0B;
+    }
+    
+    .property-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+    
+    .tenant-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #F59E0B;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Barra Lateral (Estilo Gmail) -->
+        <div class="w-full md:w-64 bg-gray-800 p-4 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none shadow-lg mb-4 md:mb-0">
+            <h2 class="text-xl font-semibold text-white montserrat mb-4">Correo</h2>
+            <ul class="space-y-2">
+                <li>
+                    <a href="{% url 'inbox' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-inbox-line mr-2"></i> Bandeja de Entrada
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'sent' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-send-plane-line mr-2"></i> Enviados
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'compose' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-pencil-line mr-2"></i> Redactar
+                    </a>
+                </li>
+                <li class="mt-6">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider px-4 mb-2">Solicitudes</h3>
+                    <a href="{% url 'contact_requests' %}" class="flex items-center text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg">
+                        <i class="ri-user-received-line mr-2"></i> Interesados
+                        {% if unread_count > 0 %}
+                        <span class="ml-auto bg-white text-amber-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="flex-1 md:ml-4">
+            <h1 class="text-3xl font-bold text-white montserrat mb-6">Solicitudes de Contacto</h1>
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <!-- Búsqueda -->
+                <form method="get" class="mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="relative flex-1">
+                            <i class="ri-search-line absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" name="search" value="{{ search_query }}" placeholder="Buscar solicitudes..." class="w-full p-2 pl-10 rounded-lg bg-gray-700 text-white">
+                        </div>
+                        <button type="submit" class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 flex items-center">
+                            <i class="ri-search-line mr-2"></i> Buscar
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Lista de Solicitudes -->
+                {% if contact_requests %}
+                    <div class="space-y-4">
+                        {% for request in contact_requests %}
+                            <div class="request-card bg-gray-700 p-4 rounded-lg {% if not request.is_read %}unread{% endif %}">
+                                <div class="flex flex-col md:flex-row">
+                                    <!-- Imagen de la propiedad -->
+                                    <div class="mb-4 md:mb-0 md:mr-4">
+                                        {% if request.property.main_photo %}
+                                            <img src="{{ request.property.main_photo.url }}" alt="{{ request.property.title }}" class="property-image">
+                                        {% else %}
+                                            <div class="property-image bg-gray-600 flex items-center justify-center text-gray-400">
+                                                <i class="ri-image-line text-2xl"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Información de la solicitud -->
+                                    <div class="flex-1">
+                                        <div class="flex items-center mb-2">
+                                            <div class="tenant-avatar mr-2">
+                                                {{ request.tenant.name|first|upper }}
+                                            </div>
+                                            <div>
+                                                <p class="text-white font-medium">{{ request.tenant.name }}</p>
+                                                <p class="text-amber-400">{{ request.property.title }}</p>
+                                            </div>
+                                            <div class="ml-auto text-right">
+                                                <span class="text-sm text-gray-400">{{ request.created_at|date:'d/m/Y H:i' }}</span>
+                                                {% if not request.is_read %}
+                                                <span class="block mt-1 bg-amber-500 text-white text-xs px-2 py-1 rounded-full">Nueva</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <p class="text-gray-300 mb-4">{{ request.message|truncatewords:30 }}</p>
+                                        
+                                        <div class="flex flex-wrap gap-2">
+                                            <a href="{% url 'view_tenant_profile' request.tenant.id request.id %}" class="bg-amber-500 text-white px-3 py-1 rounded text-sm hover:bg-amber-600">
+                                                <i class="ri-user-line mr-1"></i> Ver perfil
+                                            </a>
+                                            <form method="post" action="{% url 'process_contact_request' request.id %}" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="accept">
+                                                <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                                                    <i class="ri-check-line mr-1"></i> Aceptar
+                                                </button>
+                                            </form>
+                                            <form method="post" action="{% url 'process_contact_request' request.id %}" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="reject">
+                                                <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                                                    <i class="ri-close-line mr-1"></i> Rechazar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10">
+                        <div class="text-amber-500 text-5xl mb-4">
+                            <i class="ri-user-received-line"></i>
+                        </div>
+                        <p class="text-gray-400 text-lg">No tienes solicitudes de contacto.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

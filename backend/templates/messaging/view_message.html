@@ -1,34 +1,81 @@
 {% extends 'base.html' %}
 
-{% block title %}Correo - Ver Mensaje - VeriHome{% endblock %}
+{% block title %}Ver Mensaje - VeriHome{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="flex h-screen">
-        <!-- Barra Lateral (Estilo Gmail) -->
-        <div class="w-64 bg-gray-800 p-4 rounded-l-2xl shadow-lg">
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Barra Lateral -->
+        <div class="w-full md:w-64 bg-gray-800 p-4 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none shadow-lg mb-4 md:mb-0">
             <h2 class="text-xl font-semibold text-white montserrat mb-4">Correo</h2>
             <ul class="space-y-2">
-                <li><a href="{% url 'inbox' %}" class="block text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">Bandeja de Entrada</a></li>
-                <li><a href="{% url 'sent' %}" class="block text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">Enviados</a></li>
-                <li><a href="{% url 'compose' %}" class="block text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg mt-2">Redactar</a></li>
+                <li>
+                    <a href="{% url 'inbox' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-inbox-line mr-2"></i> Bandeja de Entrada
+                        {% if unread_count > 0 %}
+                        <span class="ml-auto bg-amber-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'sent' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-send-plane-line mr-2"></i> Enviados
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'compose' %}" class="flex items-center text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg mt-4">
+                        <i class="ri-pencil-line mr-2"></i> Redactar
+                    </a>
+                </li>
+                {% if user.profile_type == 'arrendador' %}
+                <li class="mt-6">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider px-4 mb-2">Solicitudes</h3>
+                    <a href="{% url 'contact_requests' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-user-received-line mr-2"></i> Interesados
+                        {% if contact_requests_count > 0 %}
+                        <span class="ml-auto bg-white text-amber-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">{{ contact_requests_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endif %}
             </ul>
         </div>
 
         <!-- Contenido Principal -->
-        <div class="flex-1 ml-4">
-            <h1 class="text-3xl font-bold text-white montserrat mb-6">Mensaje</h1>
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <p class="text-white"><strong>De:</strong> {{ message.sender.username }}</p>
-                <p class="text-gray-300"><strong>Asunto:</strong> {{ message.subject }}</p>
-                <p class="text-gray-400"><strong>Fecha:</strong> {{ message.created_at|date:'d/m/Y H:i' }}</p>
-                <div class="mt-4 p-4 bg-gray-700 rounded-lg">
-                    <p class="text-white">{{ message.body|linebreaks }}</p>
+        <div class="flex-1 md:ml-4">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-white montserrat">{{ message.subject }}</h1>
+                <div class="flex space-x-2">
+                    <a href="{% url 'reply' message.id %}" class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 flex items-center">
+                        <i class="ri-reply-line mr-2"></i> Responder
+                    </a>
+                    <a href="{% url 'delete_message' message.id %}" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center" onclick="return confirm('¿Estás seguro de que deseas eliminar este mensaje?');">
+                        <i class="ri-delete-bin-line mr-2"></i> Eliminar
+                    </a>
                 </div>
-                {% if message.recipient == request.user %}
-                    <a href="{% url 'reply_message' message.id %}" class="mt-4 inline-block bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600">Responder</a>
-                {% endif %}
-                <a href="{% url 'delete_message' message.id %}" class="mt-4 ml-2 inline-block text-red-500 hover:text-red-600" onclick="return confirm('¿Estás seguro de eliminar este mensaje?');">Eliminar</a>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <!-- Cabecera del mensaje -->
+                <div class="flex items-start mb-6 pb-4 border-b border-gray-700">
+                    <div class="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold mr-4">
+                        {{ message.sender.username|first|upper }}
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-white font-medium">{{ message.sender.name }}</p>
+                                <p class="text-gray-400 text-sm">Para: {{ message.recipient.name }}</p>
+                            </div>
+                            <p class="text-gray-400 text-sm">{{ message.created_at|date:'d/m/Y H:i' }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cuerpo del mensaje -->
+                <div class="text-white whitespace-pre-wrap">
+                    {{ message.body }}
+                </div>
             </div>
         </div>
     </div>

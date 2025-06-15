@@ -38,10 +38,12 @@ INSTALLED_APPS = [
     "apps.contracts.apps.ContractsConfig",
     "apps.payments.apps.PaymentsConfig",
     "apps.documents.apps.DocumentsConfig",
-    "apps.resume.apps.ResumeConfig",  # Correcto
-    "apps.news.apps.NewsConfig",  # Asegúrate de que la app de noticias esté incluida
+    "apps.resume.apps.ResumeConfig",
+    "apps.news.apps.NewsConfig",
+    "apps.contact.apps.ContactConfig",  # Añadida correctamente
+    "apps.notifications",  # Nueva aplicación registrada aquí
     "real_estate_channels",
-    "ai",  # Mantenemos solo 'ai' como aplicación principal
+    "ai",
     "webhooks",
 ]
 
@@ -125,12 +127,18 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# Añadimos STATICFILES_STORAGE para producción
+if not DEBUG:
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Aumentamos el límite de tamaño para videos (50MB)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB en bytes
+
+# ====================== GOOGLE MAPS API KEY ======================
+GOOGLE_MAPS_API_KEY = config("GOOGLE_MAPS_API_KEY", default="")
 
 # ====================== EMAIL CONFIGURATION ======================
 if DEBUG:

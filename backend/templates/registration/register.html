@@ -1,106 +1,211 @@
 {% extends 'base.html' %}
-{% load widget_tweaks %}
+{% load static %}
 
 {% block title %}Registro - VeriHome{% endblock %}
 
+{% block extra_css %}
+<style>
+    .register-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .register-form {
+        background-color: #1F2937;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        color: #E5E7EB;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #374151;
+        border: 1px solid #4B5563;
+        border-radius: 0.375rem;
+        color: #E5E7EB;
+        transition: border-color 0.2s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #F59E0B;
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    }
+    
+    .form-help {
+        color: #9CA3AF;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .submit-button {
+        background-color: #F59E0B;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .submit-button:hover {
+        background-color: #D97706;
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 1rem;
+        color: #E5E7EB;
+    }
+    
+    .login-link a {
+        color: #F59E0B;
+        font-weight: 600;
+        transition: color 0.2s ease;
+    }
+    
+    .login-link a:hover {
+        color: #D97706;
+    }
+    
+    .error-message {
+        color: #EF4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .interview-code-info {
+        background-color: rgba(245, 158, 11, 0.1);
+        border-left: 4px solid #F59E0B;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-12 sm:px-6 lg:px-8 flex items-center">
-    <div class="max-w-md w-full mx-auto space-y-8 bg-gray-800 p-8 rounded-2xl shadow-xl">
-        <div class="text-center">
-            <h2 class="mt-6 text-3xl font-extrabold text-white montserrat">
-                Crear tu cuenta
-            </h2>
-        </div>
-
-        {% if messages %}
-        <div class="rounded-lg p-4 mb-4">
-            {% for message in messages %}
-                <div class="flex items-center {% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white p-2 rounded">
-                    <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        {% if message.tags == 'error' %}
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        {% else %}
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
-                        {% endif %}
-                    </svg>
-                    <span>{{ message }}</span>
-                </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <form class="mt-8 space-y-6" method="POST" action="{% url 'register' %}" id="register-form">
-            {% csrf_token %}
+<div class="container mx-auto px-4 py-8">
+    <div class="register-container">
+        <h1 class="text-3xl font-bold text-white text-center mb-6">Crear Cuenta</h1>
+        
+        <div class="register-form">
+            <div class="interview-code-info">
+                <p class="text-amber-400 font-medium">Código de Entrevista Requerido</p>
+                <p class="text-gray-300 text-sm mt-1">
+                    Para registrarte en VeriHome, necesitas un código de entrevista proporcionado por nuestro equipo.
+                    Si aún no tienes uno, por favor <a href="{% url 'contact' %}" class="text-amber-400 hover:text-amber-300">contáctanos</a> para programar una entrevista.
+                </p>
+            </div>
             
-            <div class="space-y-4">
-                <!-- Campo Username -->
-                <div>
-                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-white">
-                        {{ form.username.label }}
-                    </label>
-                    {% render_field form.username class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="Elige un nombre de usuario" %}
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="error-message mb-4">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                    {{ form.username }}
+                    {% if form.username.help_text %}
+                        <div class="form-help">{{ form.username.help_text }}</div>
+                    {% endif %}
+                    {% if form.username.errors %}
+                        <div class="error-message">{{ form.username.errors }}</div>
+                    {% endif %}
                 </div>
-
-                <!-- Campo Name -->
-                <div>
-                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-white">
-                        {{ form.name.label }}
-                    </label>
-                    {% render_field form.name class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="Ingresa tu nombre completo" %}
+                
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.help_text %}
+                        <div class="form-help">{{ form.name.help_text }}</div>
+                    {% endif %}
+                    {% if form.name.errors %}
+                        <div class="error-message">{{ form.name.errors }}</div>
+                    {% endif %}
                 </div>
-
-                <!-- Campo Email -->
-                <div>
-                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-white">
-                        {{ form.email.label }}
-                    </label>
-                    {% render_field form.email class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="tu@ejemplo.com" %}
+                
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.help_text %}
+                        <div class="form-help">{{ form.email.help_text }}</div>
+                    {% endif %}
+                    {% if form.email.errors %}
+                        <div class="error-message">{{ form.email.errors }}</div>
+                    {% endif %}
                 </div>
-
-                <!-- Campo Password1 -->
-                <div>
-                    <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium text-white">
-                        {{ form.password1.label }}
-                    </label>
-                    {% render_field form.password1 class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="Crea una contraseña" %}
+                
+                <div class="form-group">
+                    <label for="{{ form.profile_type.id_for_label }}" class="form-label">{{ form.profile_type.label }}</label>
+                    {{ form.profile_type }}
+                    {% if form.profile_type.help_text %}
+                        <div class="form-help">{{ form.profile_type.help_text }}</div>
+                    {% endif %}
+                    {% if form.profile_type.errors %}
+                        <div class="error-message">{{ form.profile_type.errors }}</div>
+                    {% endif %}
                 </div>
-
-                <!-- Campo Password2 -->
-                <div>
-                    <label for="{{ form.password2.id_for_label }}" class="block text-sm font-medium text-white">
-                        {{ form.password2.label }}
-                    </label>
-                    {% render_field form.password2 class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white placeholder-gray-400" placeholder="Confirma tu contraseña" %}
+                
+                <div class="form-group">
+                    <label for="{{ form.interview_code.id_for_label }}" class="form-label">{{ form.interview_code.label }}</label>
+                    {{ form.interview_code }}
+                    {% if form.interview_code.help_text %}
+                        <div class="form-help">{{ form.interview_code.help_text }}</div>
+                    {% endif %}
+                    {% if form.interview_code.errors %}
+                        <div class="error-message">{{ form.interview_code.errors }}</div>
+                    {% endif %}
                 </div>
-
-                <!-- Campo Profile Type -->
-                <div>
-                    <label for="{{ form.profile_type.id_for_label }}" class="block text-sm font-medium text-white">
-                        {{ form.profile_type.label }}
-                    </label>
-                    {% render_field form.profile_type class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-gray-700 text-white" %}
+                
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
+                    {{ form.password1 }}
+                    {% if form.password1.help_text %}
+                        <div class="form-help">{{ form.password1.help_text }}</div>
+                    {% endif %}
+                    {% if form.password1.errors %}
+                        <div class="error-message">{{ form.password1.errors }}</div>
+                    {% endif %}
                 </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
+                    {{ form.password2 }}
+                    {% if form.password2.help_text %}
+                        <div class="form-help">{{ form.password2.help_text }}</div>
+                    {% endif %}
+                    {% if form.password2.errors %}
+                        <div class="error-message">{{ form.password2.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="submit-button">Registrarse</button>
+            </form>
+            
+            <div class="login-link">
+                ¿Ya tienes una cuenta? <a href="{% url 'login' %}">Iniciar sesión</a>
             </div>
-
-            <!-- Checkbox de Términos y Condiciones -->
-            <div class="flex items-center">
-                <input id="terms" name="terms" type="checkbox" required
-                    class="h-4 w-4 text-primary focus:ring-primary border-gray-600 rounded">
-                <label for="terms" class="ml-2 block text-sm text-gray-300">
-                    Acepto los <a href="#" class="text-primary hover:underline">Términos y Condiciones</a>
-                </label>
-            </div>
-
-            <div>
-                <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-amber-500 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                    Crear Cuenta
-                </button>
-            </div>
-        </form>
-
-        <div class="text-center text-sm text-gray-400">
-            ¿Ya tienes una cuenta? <a href="{% url 'login' %}" class="font-medium text-primary hover:text-amber-500">Inicia sesión aquí</a>
         </div>
     </div>
 </div>

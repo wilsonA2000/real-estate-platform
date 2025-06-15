@@ -1,54 +1,83 @@
 {% extends 'base.html' %}
 
-{% block title %}Correo - Redactar - VeriHome{% endblock %}
+{% block title %}Redactar Mensaje - VeriHome{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="flex h-screen">
-        <!-- Barra Lateral (Estilo Gmail) -->
-        <div class="w-64 bg-gray-800 p-4 rounded-l-2xl shadow-lg">
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Barra Lateral -->
+        <div class="w-full md:w-64 bg-gray-800 p-4 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none shadow-lg mb-4 md:mb-0">
             <h2 class="text-xl font-semibold text-white montserrat mb-4">Correo</h2>
             <ul class="space-y-2">
-                <li><a href="{% url 'inbox' %}" class="block text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">Bandeja de Entrada</a></li>
-                <li><a href="{% url 'sent' %}" class="block text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">Enviados</a></li>
-                <li><a href="{% url 'compose' %}" class="block text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg mt-2">Redactar</a></li>
+                <li>
+                    <a href="{% url 'inbox' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-inbox-line mr-2"></i> Bandeja de Entrada
+                        {% if unread_count > 0 %}
+                        <span class="ml-auto bg-amber-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'sent' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-send-plane-line mr-2"></i> Enviados
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'compose' %}" class="flex items-center text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg">
+                        <i class="ri-pencil-line mr-2"></i> Redactar
+                    </a>
+                </li>
+                {% if user.profile_type == 'arrendador' %}
+                <li class="mt-6">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider px-4 mb-2">Solicitudes</h3>
+                    <a href="{% url 'contact_requests' %}" class="flex items-center text-white hover:bg-amber-500 hover:text-white px-4 py-2 rounded-lg">
+                        <i class="ri-user-received-line mr-2"></i> Interesados
+                        {% if contact_requests_count > 0 %}
+                        <span class="ml-auto bg-white text-amber-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">{{ contact_requests_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endif %}
             </ul>
         </div>
 
         <!-- Contenido Principal -->
-        <div class="flex-1 ml-4">
-            <h1 class="text-3xl font-bold text-white montserrat mb-6">Redactar Correo</h1>
+        <div class="flex-1 md:ml-4">
+            <h1 class="text-3xl font-bold text-white montserrat mb-6">Redactar Mensaje</h1>
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <form method="post" class="space-y-4">
+                <form method="post" class="space-y-6">
                     {% csrf_token %}
+                    
+                    <!-- Destinatario -->
                     <div>
-                        <label for="contract" class="block text-gray-300">Contrato Asociado:</label>
-                        <select name="contract" id="contract" class="w-full p-2 rounded-lg bg-gray-700 text-white" required>
-                            <option value="">Selecciona un contrato</option>
-                            {% for contract in contracts %}
-                                <option value="{{ contract.id }}">{{ contract }}</option>
+                        <label for="recipient" class="block text-white mb-2">Destinatario:</label>
+                        <select name="recipient" id="recipient" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:border-amber-500" required>
+                            <option value="">Seleccionar destinatario</option>
+                            {% for user_option in users %}
+                                <option value="{{ user_option.id }}" {% if recipient and recipient.id == user_option.id %}selected{% endif %}>
+                                    {{ user_option.name }} ({{ user_option.get_profile_type_display }})
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
+                    
+                    <!-- Asunto -->
                     <div>
-                        <label for="recipient" class="block text-gray-300">Destinatario:</label>
-                        <select name="recipient" id="recipient" class="w-full p-2 rounded-lg bg-gray-700 text-white" required>
-                            <option value="">Selecciona un destinatario</option>
-                            {% for user in allowed_users %}
-                                <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
-                            {% endfor %}
-                        </select>
+                        <label for="subject" class="block text-white mb-2">Asunto:</label>
+                        <input type="text" name="subject" id="subject" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:border-amber-500" required>
                     </div>
+                    
+                    <!-- Mensaje -->
                     <div>
-                        <label for="subject" class="block text-gray-300">Asunto:</label>
-                        <input type="text" name="subject" id="subject" class="w-full p-2 rounded-lg bg-gray-700 text-white" required>
+                        <label for="body" class="block text-white mb-2">Mensaje:</label>
+                        <textarea name="body" id="body" rows="10" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:border-amber-500" required></textarea>
                     </div>
-                    <div>
-                        <label for="body" class="block text-gray-300">Mensaje:</label>
-                        <textarea name="body" id="body" rows="6" class="w-full p-2 rounded-lg bg-gray-700 text-white" required></textarea>
+                    
+                    <!-- Botones -->
+                    <div class="flex justify-end space-x-4">
+                        <a href="{% url 'inbox' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-500">Cancelar</a>
+                        <button type="submit" class="bg-amber-500 text-white px-6 py-3 rounded-lg hover:bg-amber-600">Enviar</button>
                     </div>
-                    <button type="submit" class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600">Enviar</button>
-                    <a href="{% url 'inbox' %}" class="text-gray-400 hover:text-amber-500 ml-4">Cancelar</a>
                 </form>
             </div>
         </div>

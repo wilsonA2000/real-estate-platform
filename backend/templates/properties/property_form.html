@@ -1,7 +1,159 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load static %}
 
-{% block title %}Subir Propiedad - VeriHome{% endblock %}
+{% block title %}{% if is_update %}Editar{% else %}Subir{% endif %} Propiedad - VeriHome{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+<style>
+    .modern-video-frame {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%);
+        border-radius: 24px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+        border: 2.5px solid #e5e7eb;
+        padding: 2.5rem 2rem 2rem 2rem;
+        margin: 2.5rem auto 0 auto;
+        max-width: 980px;
+        min-width: 340px;
+        transition: box-shadow 0.3s;
+        position: relative;
+        animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .modern-video-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        letter-spacing: 0.01em;
+    }
+    .modern-video-header i {
+        font-size: 2rem;
+        color: #6366f1;
+        vertical-align: middle;
+    }
+    .modern-video-preview {
+        width: 900px;
+        height: 506px;
+        max-width: 100%;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        background: #18181b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #c7d2fe;
+        margin: 0 auto;
+        position: relative;
+    }
+    .modern-video-preview > div[data-plyr-provider],
+    .modern-video-preview .plyr,
+    .modern-video-preview iframe,
+    .modern-video-preview video {
+        border-radius: 18px !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 320px;
+        min-height: 180px;
+        max-width: 100%;
+        max-height: 100%;
+        background: #18181b;
+        display: block;
+    }
+    .photo-upload-section {
+        background: #f8fafc;
+        border-radius: 18px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+        padding: 2rem 1rem 1.5rem 1rem;
+        margin: 2rem auto 0 auto;
+        max-width: 900px;
+        border: 1.5px solid #e5e7eb;
+    }
+    .photo-upload-label {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    .photo-preview-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        justify-content: flex-start;
+    }
+    .photo-preview-item {
+        position: relative;
+        width: 160px;
+        height: 120px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        border: 2px solid transparent;
+        transition: border 0.2s;
+    }
+    .photo-preview-item.selected {
+        border: 2px solid #6366f1;
+    }
+    .photo-preview-item img {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+        display: block;
+    }
+    .photo-preview-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0.3rem 0.5rem 0.5rem 0.5rem;
+        background: #f3f4f6;
+        border-radius: 0 0 10px 10px;
+    }
+    .photo-preview-controls label {
+        font-size: 0.9rem;
+        color: #6366f1;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .photo-preview-controls input[type="radio"] {
+        accent-color: #6366f1;
+    }
+    .photo-preview-controls .move-btn {
+        background: #e0e7ff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.2rem 0.5rem;
+        cursor: pointer;
+        font-size: 1rem;
+        color: #6366f1;
+        margin: 0 2px;
+        transition: background 0.2s;
+    }
+    .photo-preview-controls .move-btn:hover {
+        background: #6366f1;
+        color: #fff;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
     {% if messages %}
@@ -16,8 +168,8 @@
 
     <div class="pt-24 pb-12 bg-gradient-to-r from-primary to-amber-400">
         <div class="container mx-auto px-4 text-center text-white">
-            <h1 class="text-4xl font-bold">Subir Nueva Propiedad</h1>
-            <p class="mt-4 max-w-2xl mx-auto">Comparte tu propiedad con nuestra comunidad inmobiliaria confiable.</p>
+            <h1 class="text-4xl font-bold">{% if is_update %}Editar{% else %}Subir Nueva{% endif %} Propiedad</h1>
+            <p class="mt-4 max-w-2xl mx-auto">{% if is_update %}Modifica los detalles de tu propiedad.{% else %}Comparte tu propiedad con nuestra comunidad inmobiliaria confiable.{% endif %}</p>
         </div>
     </div>
 
@@ -46,63 +198,366 @@
                     </div>
                 {% endif %}
 
-                <!-- Campos del formulario (generados dinámicamente) -->
+                <!-- Campos del formulario -->
                 {% for field in property_form %}
-                    <div class="mb-6">
-                        <label for="{{ field.id_for_label }}" class="block text-gray-700 mb-2 font-medium">
-                            {{ field.label }}
-                            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
-                        </label>
-                        {% render_field field class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                        {% for error in field.errors %}
-                            <p class="text-red-600 text-sm mt-1">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-
-                <!-- Fotos -->
-                <div class="mb-6">
-                    <label class="block text-gray-700 mb-2 font-medium">Fotos</label>
-                    {{ photo_formset.management_form }}
-                    {% for form in photo_formset %}
-                        <div class="mb-4">
-                            {% render_field form.image class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                            {% for error in form.image.errors %}
+                    {% if field.name != 'latitude' and field.name != 'longitude' and field.name != 'location' %}
+                        <div class="mb-6">
+                            <label for="{{ field.id_for_label }}" class="block text-gray-700 mb-2 font-medium">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            
+                            {% if field.name == 'exact_address' %}
+                                <div class="mb-2">
+                                    <label for="id_exact_address" class="block text-gray-700 font-medium mb-1">Dirección exacta del inmueble <span class="text-red-500">*</span></label>
+                                    <div id="mapbox-geocoder" class="mb-2"></div>
+                                    <div id="mapbox-map" style="height: 220px; border-radius: 8px; margin-bottom: 0.5rem;"></div>
+                                    <p class="text-xs text-gray-500 mt-1">Busca la dirección o mueve el marcador en el mapa. El autocompletado y el mapa están en español. La ubicación seleccionada se reflejará en la vista detallada.</p>
+                                </div>
+                                <div id="location-preview" class="location-preview">
+                                    <p><strong>Ubicación seleccionada:</strong> <span id="selected-address">No seleccionada</span></p>
+                                    <button type="button" id="confirm-mapbox-location" class="bg-primary text-white px-4 py-2 rounded mt-2" autocomplete="off">Confirmar ubicación seleccionada</button>
+                                    <div id="confirm-address-message" class="mt-2 text-green-700 font-semibold" style="display:none;"></div>
+                                </div>
+                                <!-- Modal de confirmación de ubicación -->
+                                <div id="location-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+                                    <div style="background:white; color:#222; border-radius:8px; max-width:400px; margin:auto; padding:2rem; box-shadow:0 4px 16px rgba(0,0,0,0.2); text-align:center;">
+                                        <h3 class="text-lg font-bold mb-4">Confirmar ubicación</h3>
+                                        <p id="modal-location-text" class="mb-6"></p>
+                                        <button type="button" id="modal-location-yes" class="bg-primary text-white px-4 py-2 rounded mr-2">Sí</button>
+                                        <button type="button" id="modal-location-no" class="bg-gray-400 text-white px-4 py-2 rounded">No</button>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="latitude" id="id_latitude" value="{{ property_form.latitude.value|default_if_none:'' }}">
+                                <input type="hidden" name="longitude" id="id_longitude" value="{{ property_form.longitude.value|default_if_none:'' }}">
+                            {% elif field.name == 'video' %}
+                                <div class="modern-video-frame">
+                                    <div class="modern-video-header">
+                                        <i class="ri-movie-2-line"></i>
+                                        <span>Previsualización de video subido</span>
+                                    </div>
+                                    {% render_field field id=field.id_for_label name=field.html_name class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
+                                    <div id="video-file-preview" class="modern-video-preview"></div>
+                                </div>
+                            {% elif field.name == 'video_url' %}
+                                <div class="modern-video-frame">
+                                    <div class="modern-video-header">
+                                        <i class="ri-youtube-line"></i>
+                                        <span>Previsualización de video por URL</span>
+                                    </div>
+                                    {% render_field field id=field.id_for_label name=field.html_name class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
+                                    <div id="video-url-preview" class="modern-video-preview"></div>
+                                </div>
+                            {% else %}
+                                {% render_field field id=field.id_for_label name=field.html_name class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
+                            {% endif %}
+                            
+                            {% for error in field.errors %}
                                 <p class="text-red-600 text-sm mt-1">{{ error }}</p>
                             {% endfor %}
                         </div>
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Fotos -->
+                <div class="photo-upload-section">
+                    <label class="photo-upload-label">Fotos de la propiedad</label>
+                    <input type="file" id="photo-upload-input" name="photos" accept="image/*" multiple style="margin-bottom: 1rem;" />
+                    <div id="photo-preview-list" class="photo-preview-list"></div>
                 </div>
 
                 <!-- Botón de envío -->
                 <button type="submit" class="bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-amber-600 transition-colors duration-300 w-full">
-                    Publicar Propiedad
+                    {% if is_update %}Actualizar{% else %}Publicar{% endif %} Propiedad
                 </button>
             </form>
         </div>
     </div>
+{% endblock %}
 
-    <script>
-        // Cambio dinámico del sufijo de moneda
-        function updateCurrencySuffix(currency) {
-            const suffix = document.getElementById("currency-suffix");
-            if (currency === "USD") suffix.textContent = "USD";
-            else if (currency === "EUR") suffix.textContent = "EUR";
-            else suffix.textContent = "COP";
+{% block extra_scripts %}
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css' type='text/css' />
+<script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1Ijoid2lsc29uYXJndWVsbG8yMDI1IiwiYSI6ImNtYm1zcmg1aDE0NTkyam9rZDRkNzF5YWoifQ.FgvTtKt3AK5uxcoz8BHtmw';
+document.addEventListener('DOMContentLoaded', function() {
+    const geocoderContainer = document.getElementById('mapbox-geocoder');
+    const exactAddressInput = document.getElementById('id_exact_address');
+    const latitudeInput = document.getElementById('id_latitude');
+    const longitudeInput = document.getElementById('id_longitude');
+    const locationPreview = document.getElementById('location-preview');
+    const selectedAddressSpan = document.getElementById('selected-address');
+    const confirmMsg = document.getElementById('confirm-address-message');
+    let marker;
+    let map;
+
+    // Inicializar el mapa
+    map = new mapboxgl.Map({
+        container: 'mapbox-map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [longitudeInput.value ? parseFloat(longitudeInput.value) : -74.297333, latitudeInput.value ? parseFloat(latitudeInput.value) : 4.570868],
+        zoom: (latitudeInput.value && longitudeInput.value) ? 15 : 5,
+        locale: 'es-ES'
+    });
+    map.addControl(new mapboxgl.NavigationControl());
+
+    // Geocoder
+    const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl,
+        marker: false,
+        language: 'es',
+        placeholder: 'Buscar dirección en español...',
+        countries: 'CO',
+        bbox: [-81.0, -4.0, -66.0, 13.0] // Limita a Colombia
+    });
+    geocoderContainer.appendChild(geocoder.onAdd(map));
+
+    // Evento al seleccionar una dirección
+    let pendingCoords = null;
+    let pendingPlace = null;
+    geocoder.on('result', function(e) {
+        const coords = e.result.center;
+        const place = e.result.place_name;
+        if (marker) marker.remove();
+        marker = new mapboxgl.Marker({ draggable: true })
+            .setLngLat(coords)
+            .addTo(map);
+        map.flyTo({ center: coords, zoom: 16 });
+        pendingCoords = coords;
+        pendingPlace = place;
+        locationPreview.style.display = 'block';
+        selectedAddressSpan.textContent = place;
+        confirmMsg.textContent = `Haz clic en 'Confirmar ubicación seleccionada' para guardar esta dirección.`;
+        confirmMsg.style.display = 'block';
+        
+        // Guardar en variables globales para acceso desde otros scripts
+        window.pendingCoords = coords;
+        window.pendingPlace = place;
+    });
+
+    // Mover marcador manualmente
+    map.on('click', function(e) {
+        if (marker) {
+            marker.setLngLat(e.lngLat);
+        } else {
+            marker = new mapboxgl.Marker({ draggable: true })
+                .setLngLat(e.lngLat)
+                .addTo(map);
         }
+        pendingCoords = [e.lngLat.lng, e.lngLat.lat];
+        pendingPlace = null; // Requiere reverse geocoding para actualizar
+        selectedAddressSpan.textContent = `Lat: ${e.lngLat.lat.toFixed(6)}, Lng: ${e.lngLat.lng.toFixed(6)}`;
+        confirmMsg.textContent = `Haz clic en 'Confirmar ubicación seleccionada' para guardar esta ubicación.`;
+        confirmMsg.style.display = 'block';
+        locationPreview.style.display = 'block';
+        
+        // Guardar en variables globales para acceso desde otros scripts
+        window.pendingCoords = pendingCoords;
+        window.pendingPlace = pendingPlace;
+    });
 
-        // Validación del campo de video
-        document.getElementById('property-form').addEventListener('submit', function (e) {
-            const videoInput = document.querySelector('[name="video"]');
-            if (videoInput && videoInput.value) {
-                const isURL = videoInput.value.startsWith("http://") || videoInput.value.startsWith("https://");
-                const isFile = videoInput.files && videoInput.files.length > 0;
+    // Actualizar al arrastrar el marcador
+    if (marker) {
+        marker.on('dragend', function() {
+            const lngLat = marker.getLngLat();
+            pendingCoords = [lngLat.lng, lngLat.lat];
+            pendingPlace = null;
+            selectedAddressSpan.textContent = `Lat: ${lngLat.lat.toFixed(6)}, Lng: ${lngLat.lng.toFixed(6)}`;
+            confirmMsg.textContent = `Haz clic en 'Confirmar ubicación seleccionada' para guardar esta ubicación.`;
+            confirmMsg.style.display = 'block';
+            
+            // Guardar en variables globales para acceso desde otros scripts
+            window.pendingCoords = pendingCoords;
+            window.pendingPlace = pendingPlace;
+        });
+    }
 
-                if (!isURL && !isFile) {
-                    e.preventDefault();
-                    alert("Por favor sube un archivo de video o proporciona una URL válida.");
+    // Cargar marcador si hay coordenadas iniciales
+    if (latitudeInput.value && longitudeInput.value) {
+        marker = new mapboxgl.Marker({ draggable: true })
+            .setLngLat([parseFloat(longitudeInput.value), parseFloat(latitudeInput.value)])
+            .addTo(map);
+        map.flyTo({ center: [parseFloat(longitudeInput.value), parseFloat(latitudeInput.value)], zoom: 15 });
+    }
+});
+</script>
+<script>
+// Modern photo upload with preview, main selection, and drag & drop order
+const photoInput = document.getElementById('photo-upload-input');
+const previewList = document.getElementById('photo-preview-list');
+let photoFiles = [];
+let mainPhotoIndex = 0;
+function renderPhotoPreviews() {
+    previewList.innerHTML = '';
+    photoFiles.forEach((file, idx) => {
+        const item = document.createElement('div');
+        item.className = 'photo-preview-item' + (idx === mainPhotoIndex ? ' selected' : '');
+        item.draggable = true;
+        item.dataset.idx = idx;
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.onload = () => URL.revokeObjectURL(img.src);
+        const controls = document.createElement('div');
+        controls.className = 'photo-preview-controls';
+        // Main selector
+        const mainLabel = document.createElement('label');
+        mainLabel.innerHTML = `<input type="radio" name="main_photo" value="${idx}" ${idx === mainPhotoIndex ? 'checked' : ''}> Principal`;
+        mainLabel.querySelector('input').addEventListener('change', () => {
+            mainPhotoIndex = idx;
+            renderPhotoPreviews();
+        });
+        // Move left
+        const moveLeft = document.createElement('button');
+        moveLeft.type = 'button';
+        moveLeft.className = 'move-btn';
+        moveLeft.innerHTML = '←';
+        moveLeft.disabled = idx === 0;
+        moveLeft.onclick = () => {
+            if (idx > 0) {
+                [photoFiles[idx-1], photoFiles[idx]] = [photoFiles[idx], photoFiles[idx-1]];
+                if (mainPhotoIndex === idx) mainPhotoIndex--;
+                else if (mainPhotoIndex === idx-1) mainPhotoIndex++;
+                renderPhotoPreviews();
+            }
+        };
+        // Move right
+        const moveRight = document.createElement('button');
+        moveRight.type = 'button';
+        moveRight.className = 'move-btn';
+        moveRight.innerHTML = '→';
+        moveRight.disabled = idx === photoFiles.length-1;
+        moveRight.onclick = () => {
+            if (idx < photoFiles.length-1) {
+                [photoFiles[idx+1], photoFiles[idx]] = [photoFiles[idx], photoFiles[idx+1]];
+                if (mainPhotoIndex === idx) mainPhotoIndex++;
+                else if (mainPhotoIndex === idx+1) mainPhotoIndex--;
+                renderPhotoPreviews();
+            }
+        };
+        controls.appendChild(mainLabel);
+        controls.appendChild(moveLeft);
+        controls.appendChild(moveRight);
+        item.appendChild(img);
+        item.appendChild(controls);
+        // Drag & drop
+        item.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('idx', idx);
+        });
+        item.addEventListener('dragover', e => e.preventDefault());
+        item.addEventListener('drop', e => {
+            e.preventDefault();
+            const from = +e.dataTransfer.getData('idx');
+            const to = idx;
+            if (from !== to) {
+                const moved = photoFiles.splice(from, 1)[0];
+                photoFiles.splice(to, 0, moved);
+                if (mainPhotoIndex === from) mainPhotoIndex = to;
+                else if (mainPhotoIndex > from && mainPhotoIndex <= to) mainPhotoIndex--;
+                else if (mainPhotoIndex < from && mainPhotoIndex >= to) mainPhotoIndex++;
+                renderPhotoPreviews();
+            }
+        });
+        previewList.appendChild(item);
+    });
+}
+if (photoInput) {
+    photoInput.addEventListener('change', function() {
+        photoFiles = Array.from(photoInput.files);
+        mainPhotoIndex = 0;
+        renderPhotoPreviews();
+    });
+}
+// On submit, append files and main index to FormData
+const propertyForm = document.getElementById('property-form');
+if (propertyForm) {
+    propertyForm.addEventListener('submit', function(e) {
+        if (photoFiles.length > 0) {
+            const dataTransfer = new DataTransfer();
+            photoFiles.forEach(f => dataTransfer.items.add(f));
+            photoInput.files = dataTransfer.files;
+            // Set main photo index as hidden input
+            let mainInput = document.getElementById('main-photo-index');
+            if (!mainInput) {
+                mainInput = document.createElement('input');
+                mainInput.type = 'hidden';
+                mainInput.name = 'main_photo_index';
+                mainInput.id = 'main-photo-index';
+                propertyForm.appendChild(mainInput);
+            }
+            mainInput.value = mainPhotoIndex;
+        }
+    });
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+<script>
+// Video preview scripts (igual que antes)
+document.addEventListener('DOMContentLoaded', function() {
+    // Previsualización de video por archivo local
+    const videoFileInput = document.getElementById('id_video');
+    const videoFilePreview = document.getElementById('video-file-preview');
+    let lastLocalUrl = null;
+    if (videoFileInput && videoFilePreview) {
+        videoFileInput.addEventListener('change', function() {
+            videoFilePreview.innerHTML = '';
+            if (lastLocalUrl) {
+                URL.revokeObjectURL(lastLocalUrl);
+                lastLocalUrl = null;
+            }
+            if (videoFileInput.files && videoFileInput.files[0]) {
+                const file = videoFileInput.files[0];
+                if (file.type.startsWith('video/')) {
+                    const url = URL.createObjectURL(file);
+                    lastLocalUrl = url;
+                    videoFilePreview.innerHTML = `<video id=\"mini-local-video\" class=\"mini-video\" width=\"900\" height=\"506\" controls style=\"background:#18181b;display:block;margin:auto;border-radius:18px;max-width:100%;\"><source src=\"${url}\" type=\"${file.type}\">Tu navegador no soporta la reproducción de video.</video>`;
+                    setTimeout(function() { new Plyr('#mini-local-video', {hideControls: false, theme: 'dark'}); }, 200);
                 }
             }
         });
-    </script>
+    }
+    // Previsualización de video por URL (YouTube/Vimeo)
+    const videoUrlInput = document.getElementById('id_video_url');
+    const videoUrlPreview = document.getElementById('video-url-preview');
+    if (videoUrlInput && videoUrlPreview) {
+        function renderVideoPreview(url) {
+            videoUrlPreview.innerHTML = '';
+            let ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/);
+            let vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+            if (ytMatch) {
+                // YouTube embed
+                const ytId = ytMatch[1];
+                videoUrlPreview.innerHTML = `<div class=\"video-container\" style=\"width:100%;height:100%\"><div id=\"yt-preview\" data-plyr-provider=\"youtube\" data-plyr-embed-id=\"${ytId}\" style=\"width:100%;height:100%\"></div></div>`;
+                setTimeout(function() { new Plyr('#yt-preview', {hideControls: false, theme: 'dark'}); }, 200);
+            } else if (vimeoMatch) {
+                // Vimeo embed
+                const vimeoId = vimeoMatch[1];
+                videoUrlPreview.innerHTML = `<div class=\"video-container\" style=\"width:100%;height:100%\"><div id=\"vimeo-preview\" data-plyr-provider=\"vimeo\" data-plyr-embed-id=\"${vimeoId}\" style=\"width:100%;height:100%\"></div></div>`;
+                setTimeout(function() { new Plyr('#vimeo-preview', {hideControls: false, theme: 'dark'}); }, 200);
+            } else if (url.trim() !== '') {
+                videoUrlPreview.innerHTML = `<div class=\"bg-yellow-100 text-yellow-800 rounded p-3\">URL no válida de YouTube o Vimeo.</div>`;
+            }
+        }
+        videoUrlInput.addEventListener('input', function() {
+            // Si hay archivo local, no mostrar la previsualización por URL
+            if (videoFileInput && videoFileInput.files && videoFileInput.files[0]) {
+                videoUrlPreview.innerHTML = '';
+                return;
+            }
+            if (videoUrlInput.value.trim() === '') {
+                videoUrlPreview.innerHTML = '';
+                return;
+            }
+            renderVideoPreview(videoUrlInput.value.trim());
+        });
+        // Render inicial si ya hay valor y no hay archivo local
+        if (videoUrlInput.value.trim() !== '' && !(videoFileInput && videoFileInput.files && videoFileInput.files[0])) {
+            renderVideoPreview(videoUrlInput.value.trim());
+        }
+    }
+});
+</script>
 {% endblock %}

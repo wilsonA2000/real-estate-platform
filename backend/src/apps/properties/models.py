@@ -19,7 +19,6 @@ class InterviewCode(models.Model):
     def __str__(self):
         return self.code
 
-
 class Property(models.Model):
     PROPERTY_TYPES = [
         ("casa", "Casa"),
@@ -39,7 +38,8 @@ class Property(models.Model):
     exact_address = models.CharField(max_length=200, blank=True, null=True)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, choices=CURRENCIES, default="COP")
-    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPES)
+    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPES, db_index=True)
+
     video = models.FileField(
         upload_to="property_videos/",
         blank=True,
@@ -49,12 +49,14 @@ class Property(models.Model):
     video_url = models.URLField(
         blank=True, null=True, help_text="URL de video alternativa (YouTube o Vimeo)"
     )
+
     requirements = models.TextField(blank=True)
     characteristics = models.TextField(blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="properties")
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
+    # Detalles físicos
     bedrooms = models.PositiveIntegerField(blank=True, null=True)
     bathrooms = models.PositiveIntegerField(blank=True, null=True)
     parking_spaces = models.PositiveIntegerField(blank=True, null=True)
@@ -62,9 +64,12 @@ class Property(models.Model):
     land_area = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     main_photo = models.ImageField(upload_to="property_main_photos/", blank=True, null=True)
 
+    # Geolocalización
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+
     def __str__(self):
         return self.title
-
 
 class PropertyPhoto(models.Model):
     property = models.ForeignKey(
@@ -72,6 +77,8 @@ class PropertyPhoto(models.Model):
     )
     image = models.ImageField(upload_to="property_photos/", blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_main = models.BooleanField(default=False)
+    order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"Foto de {self.property.title}"

@@ -18,32 +18,29 @@
             <!-- Contact Form -->
             <div class="w-full md:w-1/2 form-container">
                 <div class="bg-white rounded-lg shadow-xl p-8">
-                    <h2 class="montserrat text-2xl font-bold mb-6">Envíanos un mensaje</h2>
+                    <h2 class="montserrat text-2xl font-bold mb-6 text-gray-900">Envíanos un mensaje</h2>
                     <form id="contact-form">
                         <div class="mb-6">
                             <label for="name" class="block text-gray-700 mb-2 font-medium">Nombre completo</label>
-                            <input type="text" id="name" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none" placeholder="Ingresa tu nombre completo">
+                            <input type="text" id="name" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" placeholder="Ingresa tu nombre completo">
                         </div>
                         <div class="mb-6">
                             <label for="email" class="block text-gray-700 mb-2 font-medium">Correo electrónico</label>
-                            <input type="email" id="email" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none" placeholder="Ingresa tu correo electrónico">
+                            <input type="email" id="email" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" placeholder="Ingresa tu correo electrónico">
                         </div>
                         <div class="mb-6">
                             <label for="phone" class="block text-gray-700 mb-2 font-medium">Teléfono</label>
-                            <input type="tel" id="phone" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none" placeholder="Ingresa tu número de teléfono">
+                            <input type="tel" id="phone" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" placeholder="Ingresa tu número de teléfono">
                         </div>
                         <div class="mb-6">
                             <label for="message" class="block text-gray-700 mb-2 font-medium">Mensaje</label>
-                            <textarea id="message" rows="5" class="contact-input w-full px-4 py-3 border border-gray-300 rounded resize-none focus:outline-none" placeholder="¿En qué podemos ayudarte?"></textarea>
+                            <textarea id="message" rows="5" class="contact-input w-full px-4 py-3 border border-gray-300 rounded resize-none focus:outline-none text-gray-900" placeholder="¿En qué podemos ayudarte?"></textarea>
                         </div>
                         <div class="flex items-center mb-6">
-                            <div class="w-5 h-5 flex items-center justify-center mr-3">
-                                <input type="checkbox" id="privacy" class="opacity-0 absolute h-5 w-5">
-                                <div class="bg-white border border-gray-300 rounded w-5 h-5 flex flex-shrink-0 justify-center items-center focus-within:border-primary">
-                                    <svg class="fill-current hidden w-3 h-3 text-primary pointer-events-none" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
-                                </div>
-                            </div>
-                            <label for="privacy" class="text-sm text-gray-700">Acepto la política de privacidad y el tratamiento de mis datos</label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="privacy" class="form-checkbox h-5 w-5 text-amber-500 rounded border-gray-300 focus:ring-amber-500">
+                                <span class="ml-2 text-sm text-gray-700">Acepto la política de privacidad y el tratamiento de mis datos</span>
+                            </label>
                         </div>
                         <button type="submit" class="bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-amber-600 transition-colors duration-300 w-full md:w-auto whitespace-nowrap">Enviar mensaje</button>
                     </form>
@@ -52,7 +49,7 @@
             <!-- Contact Info -->
             <div class="w-full md:w-1/2 contact-info">
                 <div class="bg-white rounded-lg shadow-xl p-8 h-full">
-                    <h2 class="montserrat text-2xl font-bold mb-6">Información de contacto</h2>
+                    <h2 class="montserrat text-2xl font-bold mb-6 text-gray-900">Información de contacto</h2>
                     <div class="space-y-6">
                         <div class="flex items-start">
                             <div class="w-10 h-10 flex items-center justify-center bg-amber-100 rounded-full mr-4 flex-shrink-0">
@@ -127,20 +124,9 @@
     </a>
 {% endblock %}
 
-{% block extra_js %}
+{% block extra_scripts %}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Custom checkbox functionality
-            const checkbox = document.querySelector('#privacy');
-            const checkboxDiv = checkbox.nextElementSibling;
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    checkboxDiv.querySelector('svg').classList.remove('hidden');
-                } else {
-                    checkboxDiv.querySelector('svg').classList.add('hidden');
-                }
-            });
-
             // Form validation and submission
             const form = document.querySelector('#contact-form');
             form.addEventListener('submit', function(e) {
@@ -178,9 +164,9 @@
                 }
                 if (!privacy) {
                     isValid = false;
-                    checkboxDiv.classList.add('border-red-500');
+                    document.querySelector('#privacy').classList.add('ring-2', 'ring-red-500');
                 } else {
-                    checkboxDiv.classList.remove('border-red-500');
+                    document.querySelector('#privacy').classList.remove('ring-2', 'ring-red-500');
                 }
 
                 if (isValid) {
@@ -188,16 +174,22 @@
                     const submitButton = form.querySelector('button[type="submit"]');
                     submitButton.disabled = true;
                     submitButton.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i> Enviando...';
+                    
+                    // Simulate API call
                     setTimeout(() => {
                         form.reset();
-                        checkboxDiv.querySelector('svg').classList.add('hidden');
+                        
                         // Show success message
                         const successMessage = document.createElement('div');
                         successMessage.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mt-4';
                         successMessage.innerHTML = '<strong>¡Mensaje enviado!</strong> Nos pondremos en contacto contigo lo antes posible.';
                         form.appendChild(successMessage);
+                        
+                        // Reset button
                         submitButton.disabled = false;
                         submitButton.innerHTML = 'Enviar mensaje';
+                        
+                        // Remove success message after 5 seconds
                         setTimeout(() => {
                             successMessage.remove();
                         }, 5000);

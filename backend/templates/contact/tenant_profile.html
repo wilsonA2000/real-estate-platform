@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil de {{ tenant.name }} - VeriHome{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(to right, #F59E0B, #FBBF24);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: bold;
+        color: #F59E0B;
+        margin-right: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-section {
+        background-color: #1F2937;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-section h2 {
+        color: #F59E0B;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    
+    .info-icon {
+        color: #F59E0B;
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
+    }
+    
+    .action-button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .action-button:hover {
+        transform: translateY(-2px);
+    }
+    
+    .contact-request-box {
+        background-color: rgba(245, 158, 11, 0.1);
+        border-left: 4px solid #F59E0B;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row">
+        <!-- Contenido principal -->
+        <div class="w-full">
+            <!-- Encabezado del perfil -->
+            <div class="profile-header flex flex-col md:flex-row items-center md:items-start">
+                <div class="profile-avatar mb-4 md:mb-0">
+                    {% if tenant.profile_picture %}
+                    <img src="{{ tenant.profile_picture.url }}" alt="{{ tenant.name }}" class="w-full h-full object-cover rounded-full">
+                    {% else %}
+                    {{ tenant.name|first|upper }}
+                    {% endif %}
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <h1 class="text-3xl font-bold text-white mb-2">{{ tenant.name }}</h1>
+                    <p class="text-white opacity-80 mb-4">{{ tenant.get_profile_type_display }}</p>
+                    
+                    <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+                        {% if contact_request %}
+                        <form method="post" action="{% url 'process_contact_request' contact_request.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="accept">
+                            <button type="submit" class="action-button bg-green-600 text-white hover:bg-green-700">
+                                <i class="ri-check-line mr-2"></i> Aceptar solicitud
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'process_contact_request' contact_request.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="action-button bg-red-600 text-white hover:bg-red-700">
+                                <i class="ri-close-line mr-2"></i> Rechazar
+                            </button>
+                        </form>
+                        {% endif %}
+                        <a href="{% url 'compose' %}?to={{ tenant.id }}" class="action-button bg-amber-500 text-white hover:bg-amber-600">
+                            <i class="ri-mail-send-line mr-2"></i> Enviar mensaje
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Solicitud de contacto (si existe) -->
+            {% if contact_request %}
+            <div class="contact-request-box">
+                <h3 class="text-white font-semibold mb-2">Solicitud para {{ contact_request.property.title }}</h3>
+                <p class="text-gray-300">{{ contact_request.message }}</p>
+                <div class="mt-2 text-sm text-gray-400">
+                    <span><i class="ri-time-line mr-1"></i> {{ contact_request.created_at|date:"d/m/Y H:i" }}</span>
+                    {% if contact_request.phone %}
+                    <span class="ml-4"><i class="ri-phone-line mr-1"></i> {{ contact_request.phone }}</span>
+                    {% endif %}
+                    {% if contact_request.email %}
+                    <span class="ml-4"><i class="ri-mail-line mr-1"></i> {{ contact_request.email }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Información personal -->
+            <div class="profile-section">
+                <h2 class="text-xl font-semibold">Información personal</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="info-item">
+                            <i class="ri-user-line info-icon"></i>
+                            <div>
+                                <p class="text-gray-400 text-sm">Nombre completo</p>
+                                <p class="text-white">{{ tenant.name }}</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="ri-mail-line info-icon"></i>
+                            <div>
+                                <p class="text-gray-400 text-sm">Correo electrónico</p>
+                                <p class="text-white">{{ tenant.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="info-item">
+                            <i class="ri-phone-line info-icon"></i>
+                            <div>
+                                <p class="text-gray-400 text-sm">Teléfono</p>
+                                <p class="text-white">{{ tenant.phone_number|default:"No especificado" }}</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="ri-calendar-line info-icon"></i>
+                            <div>
+                                <p class="text-gray-400 text-sm">Miembro desde</p>
+                                <p class="text-white">{{ tenant.date_joined|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hoja de vida -->
+            <div class="profile-section">
+                <h2 class="text-xl font-semibold">Hoja de vida</h2>
+                {% if tenant.resume %}
+                <div class="text-white">
+                    {{ tenant.resume|linebreaks }}
+                </div>
+                {% else %}
+                <p class="text-gray-400">Este usuario no ha proporcionado información en su hoja de vida.</p>
+                {% endif %}
+            </div>
+            
+            <!-- Calificación -->
+            <div class="profile-section">
+                <h2 class="text-xl font-semibold">Calificación</h2>
+                <div class="flex items-center">
+                    <div class="flex">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= tenant.rating %}
+                            <i class="ri-star-fill text-amber-500 text-2xl"></i>
+                            {% else %}
+                            <i class="ri-star-line text-gray-500 text-2xl"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="ml-2 text-white">{{ tenant.rating }} de 5</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
