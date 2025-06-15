@@ -64,8 +64,8 @@ class Property(models.Model):
     land_area = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     main_photo = models.ImageField(upload_to="property_main_photos/", blank=True, null=True)
 
-    # Geolocalización
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    # Geolocalización - cambiado a 6 decimales
+    latitude = models.DecimalField(max_digits=8, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
     def __str__(self):

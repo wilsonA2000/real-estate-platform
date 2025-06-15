@@ -56,7 +56,7 @@ class PropertyDetailView(LoginRequiredMixin, ProfileRequiredMixin, DetailView):
         if self.request.user.profile_type == "arrendatario":
             context["contact_form"] = ContactRequestForm()
         context["photos"] = self.object.related_photos.all()  # Añadimos las fotos para Lightbox
-        context["GOOGLE_MAPS_API_KEY"] = getattr(settings, 'GOOGLE_MAPS_API_KEY', '')
+        context["MAPBOX_ACCESS_TOKEN"] = 'pk.eyJ1Ijoid2lsc29uYXJndWVsbG8yMDI1IiwiYSI6ImNtYm1zcmg1aDE0NTkyam9rZDRkNzF5YWoifQ.FgvTtKt3AK5uxcoz8BHtmw'
         return context
 
     def post(self, request, *args, **kwargs):
@@ -88,36 +88,23 @@ class PropertyCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request):
         property_form = PropertyForm()
-        PhotoFormSet = formset_factory(PropertyPhotoForm, extra=3, can_delete=False)
-        photo_formset = PhotoFormSet()
         return render(
             request,
             "properties/property_form.html",
             {
                 "property_form": property_form,
-                "photo_formset": photo_formset,
             },
         )
 
     def post(self, request):
         property_form = PropertyForm(request.POST, request.FILES)
-        PhotoFormSet = formset_factory(PropertyPhotoForm, extra=3, can_delete=False)
-        photo_formset = PhotoFormSet(request.POST, request.FILES)
 
         if property_form.is_valid():
             property_obj = property_form.save(commit=False)
             property_obj.owner = request.user
             property_obj.is_active = True
-            # Validar que latitude y longitude estén presentes
-            if not property_obj.latitude or not property_obj.longitude:
-                messages.error(request, "Debes seleccionar y confirmar una ubicación en el mapa.")
-                return render(
-                    request,
-                    "properties/property_form.html",
-                    {
-                        "property_form": property_form,
-                    },
-                )
+            
+            # Guardar la propiedad incluso si no hay coordenadas
             property_obj.save()
 
             # Procesar fotos múltiples, principal y orden
@@ -144,17 +131,11 @@ class PropertyCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
             for error in errors:
                 messages.error(request, f"{property_form.fields[field].label}: {error}")
 
-        for i, form in enumerate(photo_formset):
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"Foto {i + 1} - {form.fields[field].label}: {error}")
-
         return render(
             request,
             "properties/property_form.html",
             {
                 "property_form": property_form,
-                "photo_formset": photo_formset,
             },
         )
 
@@ -170,20 +151,29 @@ class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
             messages.error(request, "No tienes permiso para editar esta propiedad.")
             return redirect("property_list")
 
+        # Inicializar el formulario con los datos existentes
         property_form = PropertyForm(instance=property_obj)
-        PhotoFormSet = formset_factory(PropertyPhotoForm, extra=0, can_delete=True)
-        photo_formset = PhotoFormSet(initial=[{'property': property_obj}] * property_obj.related_photos.count())
-        for form, photo in zip(photo_formset.forms, property_obj.related_photos.all()):
-            form.instance = photo
+        
+        # Asegurar que el campo video_content tenga el valor correcto
+        if property_obj.video_url:
+            property_form.fields['video_content'].initial = property_obj.video_url
+
+        # Obtener el índice de la foto principal
+        main_photo_index = 0
+        for i, photo in enumerate(property_obj.related_photos.all()):
+            if photo.is_main:
+                main_photo_index = i
+                break
 
         return render(
             request,
             "properties/property_form.html",
             {
                 "property_form": property_form,
-                "photo_formset": photo_formset,
                 "is_update": True,
                 "property": property_obj,
+                "main_photo_index": main_photo_index,
+                "existing_photos": property_obj.related_photos.all(),
             },
         )
 
@@ -194,23 +184,16 @@ class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
             return redirect("property_list")
 
         property_form = PropertyForm(request.POST, request.FILES, instance=property_obj)
-        PhotoFormSet = formset_factory(PropertyPhotoForm, extra=0, can_delete=True)
-        photo_formset = PhotoFormSet(request.POST, request.FILES, initial=[{'property': property_obj}] * property_obj.related_photos.count())
 
         if property_form.is_valid():
             property_obj = property_form.save(commit=False)
-            # Validar que latitude y longitude estén presentes
-            if not property_obj.latitude or not property_obj.longitude:
-                messages.error(request, "Debes seleccionar y confirmar una ubicación en el mapa.")
-                return render(
-                    request,
-                    "properties/property_form.html",
-                    {
-                        "property_form": property_form,
-                        "is_update": True,
-                        "property": property_obj,
-                    },
-                )
+            
+            # Procesar el campo video_content
+            video_content = request.POST.get('video_content', '')
+            if video_content and video_content.startswith('http'):
+                property_obj.video_url = video_content
+                
+            # Guardar la propiedad
             property_obj.save()
 
             # Eliminar fotos antiguas
@@ -240,7 +223,6 @@ class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
             "properties/property_form.html",
             {
                 "property_form": property_form,
-                "photo_formset": photo_formset,
                 "is_update": True,
                 "property": property_obj,
             },

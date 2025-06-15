@@ -14,7 +14,7 @@
         border: 2.5px solid #e5e7eb;
         padding: 2.5rem 2rem 2rem 2rem;
         margin: 2.5rem auto 0 auto;
-        max-width: 980px;
+        max-width: 100%;
         min-width: 340px;
         transition: box-shadow 0.3s;
         position: relative;
@@ -40,8 +40,8 @@
         vertical-align: middle;
     }
     .modern-video-preview {
-        width: 900px;
-        height: 506px;
+        width: 100%;
+        height: 400px;
         max-width: 100%;
         border-radius: 18px;
         overflow: hidden;
@@ -174,7 +174,7 @@
     </div>
 
     <div class="container mx-auto px-4 py-16">
-        <div class="bg-white rounded-lg shadow-xl p-8 max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-5xl mx-auto">
             <h2 class="text-2xl font-bold mb-6 text-gray-900">Detalles de la Propiedad</h2>
             <form method="post" enctype="multipart/form-data" id="property-form">
                 {% csrf_token %}
@@ -200,7 +200,7 @@
 
                 <!-- Campos del formulario -->
                 {% for field in property_form %}
-                    {% if field.name != 'latitude' and field.name != 'longitude' and field.name != 'location' %}
+                    {% if field.name != 'latitude' and field.name != 'longitude' %}
                         <div class="mb-6">
                             <label for="{{ field.id_for_label }}" class="block text-gray-700 mb-2 font-medium">
                                 {{ field.label }}
@@ -214,10 +214,14 @@
                                     <div id="mapbox-map" style="height: 220px; border-radius: 8px; margin-bottom: 0.5rem;"></div>
                                     <p class="text-xs text-gray-500 mt-1">Busca la dirección o mueve el marcador en el mapa. El autocompletado y el mapa están en español. La ubicación seleccionada se reflejará en la vista detallada.</p>
                                 </div>
-                                <div id="location-preview" class="location-preview">
-                                    <p><strong>Ubicación seleccionada:</strong> <span id="selected-address">No seleccionada</span></p>
-                                    <button type="button" id="confirm-mapbox-location" class="bg-primary text-white px-4 py-2 rounded mt-2" autocomplete="off">Confirmar ubicación seleccionada</button>
-                                    <div id="confirm-address-message" class="mt-2 text-green-700 font-semibold" style="display:none;"></div>
+                                <div id="location-preview" class="location-preview bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2" style="display:none;">
+                                    <p class="mb-2"><strong>Ubicación seleccionada:</strong> <span id="selected-address" style="color:#4B5563;">No seleccionada</span></p>
+
+                                    <div class="flex items-center">
+                                        <button type="button" id="confirm-mapbox-location" class="bg-primary text-white px-4 py-2 rounded" autocomplete="off">Confirmar ubicación seleccionada</button>
+                                        <div id="location-status" class="ml-3"></div>
+                                    </div>
+                                    <div id="confirm-address-message" class="mt-2 text-green-700 font-semibold p-2 rounded" style="display:none; transition: opacity 0.3s;"></div>
                                 </div>
                                 <!-- Modal de confirmación de ubicación -->
                                 <div id="location-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
@@ -230,23 +234,34 @@
                                 </div>
                                 <input type="hidden" name="latitude" id="id_latitude" value="{{ property_form.latitude.value|default_if_none:'' }}">
                                 <input type="hidden" name="longitude" id="id_longitude" value="{{ property_form.longitude.value|default_if_none:'' }}">
-                            {% elif field.name == 'video' %}
+                            {% elif field.name == 'video' or field.name == 'video_url' %}
+                                <!-- Campos ocultos -->
+                                {% render_field field id=field.id_for_label name=field.html_name type="hidden" %}
+                            {% elif field.name == 'video_content' %}
                                 <div class="modern-video-frame">
                                     <div class="modern-video-header">
                                         <i class="ri-movie-2-line"></i>
-                                        <span>Previsualización de video subido</span>
+                                        <span>Video de la propiedad</span>
                                     </div>
-                                    {% render_field field id=field.id_for_label name=field.html_name class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                                    <div id="video-file-preview" class="modern-video-preview"></div>
-                                </div>
-                            {% elif field.name == 'video_url' %}
-                                <div class="modern-video-frame">
-                                    <div class="modern-video-header">
-                                        <i class="ri-youtube-line"></i>
-                                        <span>Previsualización de video por URL</span>
+                                    <div class="flex flex-col space-y-4 w-full">
+                                        <div class="flex items-center space-x-2">
+                                            <input type="text" id="id_video_content" name="video_content" placeholder="Pega una URL de YouTube/Vimeo" class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" value="{{ property_form.fields.video_content.initial|default:'' }}">
+                                            <button type="button" id="preview-url-btn" class="bg-primary text-white px-4 py-3 rounded">Previsualizar</button>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-gray-600">O</span>
+                                            <label for="video-file-upload" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded cursor-pointer transition-colors">
+                                                Subir archivo de video
+                                            </label>
+                                            <input type="file" id="video-file-upload" accept="video/mp4,video/mov,video/avi" class="hidden">
+                                            <span id="selected-file-name" class="text-sm text-gray-600"></span>
+                                        </div>
                                     </div>
-                                    {% render_field field id=field.id_for_label name=field.html_name class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
-                                    <div id="video-url-preview" class="modern-video-preview"></div>
+                                    <div id="video-preview" class="modern-video-preview mt-4">
+                                        <div class="flex items-center justify-center h-full text-gray-500">
+                                            Ingresa una URL o sube un archivo para previsualizar el video
+                                        </div>
+                                    </div>
                                 </div>
                             {% else %}
                                 {% render_field field id=field.id_for_label name=field.html_name class="contact-input w-full px-4 py-3 border border-gray-300 rounded focus:outline-none text-gray-900" %}
@@ -261,7 +276,8 @@
 
                 <!-- Fotos -->
                 <div class="photo-upload-section">
-                    <label class="photo-upload-label">Fotos de la propiedad</label>
+                    <label class="photo-upload-label">Fotos de la propiedad (máximo 10)</label>
+                    <p class="text-sm text-gray-600 mb-2">Selecciona hasta 10 fotos y marca una como principal para la miniatura en el listado.</p>
                     <input type="file" id="photo-upload-input" name="photos" accept="image/*" multiple style="margin-bottom: 1rem;" />
                     <div id="photo-preview-list" class="photo-preview-list"></div>
                 </div>
@@ -281,107 +297,31 @@
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js'></script>
 <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css' type='text/css' />
 <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+<script src="{% static 'js/video-preview.js' %}"></script>
+<script src="{% static 'js/mapbox-form.js' %}"></script>
+<script src="{% static 'js/location-confirmation.js' %}"></script>
+<script src="{% static 'js/show-location-preview.js' %}"></script>
 <script>
-mapboxgl.accessToken = 'pk.eyJ1Ijoid2lsc29uYXJndWVsbG8yMDI1IiwiYSI6ImNtYm1zcmg1aDE0NTkyam9rZDRkNzF5YWoifQ.FgvTtKt3AK5uxcoz8BHtmw';
+// Asegurar que las coordenadas siempre tengan 6 decimales al enviar el formulario
 document.addEventListener('DOMContentLoaded', function() {
-    const geocoderContainer = document.getElementById('mapbox-geocoder');
-    const exactAddressInput = document.getElementById('id_exact_address');
+    const propertyForm = document.getElementById('property-form');
     const latitudeInput = document.getElementById('id_latitude');
     const longitudeInput = document.getElementById('id_longitude');
-    const locationPreview = document.getElementById('location-preview');
-    const selectedAddressSpan = document.getElementById('selected-address');
-    const confirmMsg = document.getElementById('confirm-address-message');
-    let marker;
-    let map;
-
-    // Inicializar el mapa
-    map = new mapboxgl.Map({
-        container: 'mapbox-map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [longitudeInput.value ? parseFloat(longitudeInput.value) : -74.297333, latitudeInput.value ? parseFloat(latitudeInput.value) : 4.570868],
-        zoom: (latitudeInput.value && longitudeInput.value) ? 15 : 5,
-        locale: 'es-ES'
-    });
-    map.addControl(new mapboxgl.NavigationControl());
-
-    // Geocoder
-    const geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl,
-        marker: false,
-        language: 'es',
-        placeholder: 'Buscar dirección en español...',
-        countries: 'CO',
-        bbox: [-81.0, -4.0, -66.0, 13.0] // Limita a Colombia
-    });
-    geocoderContainer.appendChild(geocoder.onAdd(map));
-
-    // Evento al seleccionar una dirección
-    let pendingCoords = null;
-    let pendingPlace = null;
-    geocoder.on('result', function(e) {
-        const coords = e.result.center;
-        const place = e.result.place_name;
-        if (marker) marker.remove();
-        marker = new mapboxgl.Marker({ draggable: true })
-            .setLngLat(coords)
-            .addTo(map);
-        map.flyTo({ center: coords, zoom: 16 });
-        pendingCoords = coords;
-        pendingPlace = place;
-        locationPreview.style.display = 'block';
-        selectedAddressSpan.textContent = place;
-        confirmMsg.textContent = `Haz clic en 'Confirmar ubicación seleccionada' para guardar esta dirección.`;
-        confirmMsg.style.display = 'block';
-        
-        // Guardar en variables globales para acceso desde otros scripts
-        window.pendingCoords = coords;
-        window.pendingPlace = place;
-    });
-
-    // Mover marcador manualmente
-    map.on('click', function(e) {
-        if (marker) {
-            marker.setLngLat(e.lngLat);
-        } else {
-            marker = new mapboxgl.Marker({ draggable: true })
-                .setLngLat(e.lngLat)
-                .addTo(map);
-        }
-        pendingCoords = [e.lngLat.lng, e.lngLat.lat];
-        pendingPlace = null; // Requiere reverse geocoding para actualizar
-        selectedAddressSpan.textContent = `Lat: ${e.lngLat.lat.toFixed(6)}, Lng: ${e.lngLat.lng.toFixed(6)}`;
-        confirmMsg.textContent = `Haz clic en 'Confirmar ubicación seleccionada' para guardar esta ubicación.`;
-        confirmMsg.style.display = 'block';
-        locationPreview.style.display = 'block';
-        
-        // Guardar en variables globales para acceso desde otros scripts
-        window.pendingCoords = pendingCoords;
-        window.pendingPlace = pendingPlace;
-    });
-
-    // Actualizar al arrastrar el marcador
-    if (marker) {
-        marker.on('dragend', function() {
-            const lngLat = marker.getLngLat();
-            pendingCoords = [lngLat.lng, lngLat.lat];
-            pendingPlace = null;
-            selectedAddressSpan.textContent = `Lat: ${lngLat.lat.toFixed(6)}, Lng: ${lngLat.lng.toFixed(6)}`;
-            confirmMsg.textContent = `Haz clic en 'Confirmar ubicación seleccionada' para guardar esta ubicación.`;
-            confirmMsg.style.display = 'block';
-            
-            // Guardar en variables globales para acceso desde otros scripts
-            window.pendingCoords = pendingCoords;
-            window.pendingPlace = pendingPlace;
+    
+    if (propertyForm) {
+        propertyForm.addEventListener('submit', function(e) {
+            if (latitudeInput && latitudeInput.value && longitudeInput && longitudeInput.value) {
+                // Redondear coordenadas a exactamente 6 decimales usando Math.round
+                const lat = Math.round(parseFloat(latitudeInput.value) * 1000000) / 1000000;
+                const lng = Math.round(parseFloat(longitudeInput.value) * 1000000) / 1000000;
+                
+                // Establecer valores con formato fijo de 6 decimales
+                latitudeInput.value = lat.toFixed(6);
+                longitudeInput.value = lng.toFixed(6);
+                
+                console.log('Coordenadas enviadas:', latitudeInput.value, longitudeInput.value);
+            }
         });
-    }
-
-    // Cargar marcador si hay coordenadas iniciales
-    if (latitudeInput.value && longitudeInput.value) {
-        marker = new mapboxgl.Marker({ draggable: true })
-            .setLngLat([parseFloat(longitudeInput.value), parseFloat(latitudeInput.value)])
-            .addTo(map);
-        map.flyTo({ center: [parseFloat(longitudeInput.value), parseFloat(latitudeInput.value)], zoom: 15 });
     }
 });
 </script>
@@ -390,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
 const photoInput = document.getElementById('photo-upload-input');
 const previewList = document.getElementById('photo-preview-list');
 let photoFiles = [];
-let mainPhotoIndex = 0;
+let mainPhotoIndex = {% if main_photo_index %}{{ main_photo_index }}{% else %}0{% endif %};
 function renderPhotoPreviews() {
     previewList.innerHTML = '';
     photoFiles.forEach((file, idx) => {
@@ -464,8 +404,42 @@ function renderPhotoPreviews() {
         previewList.appendChild(item);
     });
 }
+// Cargar fotos existentes si estamos en modo edición
+{% if is_update and existing_photos %}
+// Crear una función para cargar las fotos existentes
+async function loadExistingPhotos() {
+    try {
+        const responses = await Promise.all([
+            {% for photo in existing_photos %}
+                fetch('{{ photo.image.url }}'){% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]);
+        
+        const blobs = await Promise.all(responses.map(response => response.blob()));
+        
+        photoFiles = blobs.map((blob, index) => {
+            const fileName = '{{ existing_photos.0.image.name }}'.split('/').pop();
+            return new File([blob], fileName, { type: blob.type });
+        });
+        
+        renderPhotoPreviews();
+    } catch (error) {
+        console.error('Error cargando fotos existentes:', error);
+    }
+}
+
+// Cargar fotos existentes al iniciar
+loadExistingPhotos();
+{% endif %}
+
 if (photoInput) {
     photoInput.addEventListener('change', function() {
+        // Limitar a 10 fotos
+        if (photoInput.files.length > 10) {
+            alert('Por favor, selecciona un máximo de 10 fotos.');
+            photoInput.value = '';
+            return;
+        }
         photoFiles = Array.from(photoInput.files);
         mainPhotoIndex = 0;
         renderPhotoPreviews();
@@ -495,8 +469,29 @@ if (propertyForm) {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
 <script>
-// Video preview scripts (igual que antes)
+// Video preview scripts
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar el campo de video_content con el valor existente
+    const videoContentInput = document.getElementById('id_video_content');
+    const videoPreview = document.getElementById('video-preview');
+    
+    // Si hay una URL de video existente, mostrarla en la previsualización
+    if (videoContentInput && videoContentInput.value && videoContentInput.value.startsWith('http')) {
+        const url = videoContentInput.value;
+        let ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\\w-]{11})/);
+        let vimeoMatch = url.match(/vimeo\.com\/(\\d+)/);
+        
+        if (ytMatch) {
+            const ytId = ytMatch[1];
+            videoPreview.innerHTML = `<div class="video-container" style="width:100%;height:100%"><div id="yt-preview" data-plyr-provider="youtube" data-plyr-embed-id="${ytId}" style="width:100%;height:100%"></div></div>`;
+            setTimeout(function() { new Plyr('#yt-preview', {hideControls: false, theme: 'dark'}); }, 200);
+        } else if (vimeoMatch) {
+            const vimeoId = vimeoMatch[1];
+            videoPreview.innerHTML = `<div class="video-container" style="width:100%;height:100%"><div id="vimeo-preview" data-plyr-provider="vimeo" data-plyr-embed-id="${vimeoId}" style="width:100%;height:100%"></div></div>`;
+            setTimeout(function() { new Plyr('#vimeo-preview', {hideControls: false, theme: 'dark'}); }, 200);
+        }
+    }
+    
     // Previsualización de video por archivo local
     const videoFileInput = document.getElementById('id_video');
     const videoFilePreview = document.getElementById('video-file-preview');

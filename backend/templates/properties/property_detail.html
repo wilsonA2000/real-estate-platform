@@ -5,15 +5,13 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" />
-<!-- Fancybox fallback -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" />
 <style>
     .property-gallery {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
     .gallery-item {
         position: relative;
@@ -21,9 +19,15 @@
         overflow: hidden;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
     }
     .gallery-item:hover {
+        transform: scale(1.03);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .gallery-item:focus {
+        outline: 3px solid #F59E0B;
         transform: scale(1.03);
     }
     .gallery-image {
@@ -117,6 +121,41 @@
         overflow: hidden;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+    /* Estilos para evitar problemas de renderizado del mapa */
+    #mapbox-detail-map {
+        width: 100%;
+        height: 100%;
+        min-height: 350px;
+        border-radius: 8px;
+        background-color: #e9eef2;
+        position: relative;
+        overflow: hidden;
+    }
+    .mapboxgl-canvas {
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .mapboxgl-marker {
+        cursor: pointer;
+    }
+    .mapboxgl-popup {
+        max-width: 300px;
+    }
+    .mapboxgl-popup-content {
+        padding: 12px;
+        border-radius: 6px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    /* Estilos para la dirección */
+    .property-address {
+        margin-bottom: 0.75rem;
+        line-height: 1.5;
+        color: #4b5563;
+    }
+    .property-address strong {
+        color: #1f2937;
+    }
     .contact-form-container {
         background-color: #f9fafb;
         border-radius: 12px;
@@ -177,9 +216,6 @@
         align-items: center;
         justify-content: center;
     }
-    .modal-overlay.active {
-        display: flex;
-    }
     .modal-container {
         background-color: #1F2937;
         border-radius: 0.75rem;
@@ -187,13 +223,6 @@
         max-width: 500px;
         padding: 2rem;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        transform: translateY(-20px);
-        opacity: 0;
-        transition: all 0.3s ease;
-    }
-    .modal-overlay.active .modal-container {
-        transform: translateY(0);
-        opacity: 1;
     }
     .modal-header {
         display: flex;
@@ -282,9 +311,9 @@
             {% if photos %}
             <div class="property-gallery">
                 {% for photo in photos %}
-                <a href="{{ photo.image.url }}" data-fancybox="gallery" data-caption="{{ property.title }}" class="gallery-item">
+                <div class="gallery-item" onclick="openImageModal('{{ photo.image.url }}')" tabindex="0" onkeydown="if(event.key === 'Enter') openImageModal('{{ photo.image.url }}')">
                     <img src="{{ photo.image.url }}" alt="Foto de {{ property.title }}" class="gallery-image">
-                </a>
+                </div>
                 {% empty %}
                 <p class="text-gray-700">No hay fotos disponibles.</p>
                 {% endfor %}
@@ -311,18 +340,39 @@
                         {% if "youtube.com" in property.video_url or "youtu.be" in property.video_url %}
                             {% if "watch?v=" in property.video_url %}
                                 {% with video_id=property.video_url|cut:"https://www.youtube.com/watch?v=" %}
-                                <div id="property-video" data-plyr-provider="youtube" data-plyr-embed-id="{{ video_id|cut:"&" }}" style="width:100%;max-width:900px;margin:auto;"></div>
+                                <div class="plyr__video-embed" style="width:100%;height:100%;">
+                                    <iframe
+                                        src="https://www.youtube.com/embed/{{ video_id|cut:'&' }}?origin=https://plyr.io&amp;iv_load_policy=3&amp;modestbranding=1&amp;playsinline=1&amp;showinfo=0&amp;rel=0&amp;enablejsapi=1"
+                                        allowfullscreen
+                                        allowtransparency
+                                        allow="autoplay"
+                                    ></iframe>
+                                </div>
                                 {% endwith %}
                             {% elif "youtu.be" in property.video_url %}
                                 {% with video_id=property.video_url|cut:"https://youtu.be/" %}
-                                <div id="property-video" data-plyr-provider="youtube" data-plyr-embed-id="{{ video_id|cut:"?" }}" style="width:100%;max-width:900px;margin:auto;"></div>
+                                <div class="plyr__video-embed" style="width:100%;height:100%;">
+                                    <iframe
+                                        src="https://www.youtube.com/embed/{{ video_id|cut:'?' }}?origin=https://plyr.io&amp;iv_load_policy=3&amp;modestbranding=1&amp;playsinline=1&amp;showinfo=0&amp;rel=0&amp;enablejsapi=1"
+                                        allowfullscreen
+                                        allowtransparency
+                                        allow="autoplay"
+                                    ></iframe>
+                                </div>
                                 {% endwith %}
                             {% else %}
                             <p class="text-gray-700">El enlace de YouTube no es válido. Use un formato adecuado.</p>
                             {% endif %}
                         {% elif "vimeo.com" in property.video_url %}
                             {% with video_id=property.video_url|cut:"https://vimeo.com/" %}
-                            <div id="property-video" data-plyr-provider="vimeo" data-plyr-embed-id="{{ video_id|cut:"?" }}" style="width:100%;max-width:900px;margin:auto;"></div>
+                            <div class="plyr__video-embed" style="width:100%;height:100%;">
+                                <iframe
+                                    src="https://player.vimeo.com/video/{{ video_id|cut:'?' }}?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media"
+                                    allowfullscreen
+                                    allowtransparency
+                                    allow="autoplay"
+                                ></iframe>
+                            </div>
                             {% endwith %}
                         {% else %}
                         <p class="text-gray-700">El enlace del video no es compatible. Use YouTube o Vimeo.</p>
@@ -390,17 +440,21 @@
         </section>
         {% endif %}
 
-        <!-- Mapa usando Mapbox como en el formulario de propiedad -->
+        <!-- Mapa usando Mapbox -->
         {% if property.latitude and property.longitude %}
         <section class="mt-12">
             <h2 class="montserrat text-2xl font-bold mb-4 text-gray-900">Ubicación exacta</h2>
             {% if property.exact_address %}
-            <p class="text-gray-700 mb-2"><strong>Dirección:</strong> {{ property.exact_address }}</p>
+            <p class="text-gray-700 mb-4"><strong>Dirección:</strong> {{ property.exact_address }}</p>
             {% endif %}
-            <p class="text-gray-700 mb-4"><strong>Coordenadas:</strong> {{ property.latitude }}, {{ property.longitude }}</p>
             <div class="container mx-auto pb-4 map-container">
                 <div class="bg-white rounded-lg shadow-xl overflow-hidden">
-                    <div id="mapbox-detail-map" style="height: 350px; border-radius: 8px;"></div>
+                    <div id="mapbox-detail-map" 
+                         data-lat="{{ property.latitude }}" 
+                         data-lng="{{ property.longitude }}" 
+                         {% if property.exact_address %}data-address="{{ property.exact_address }}"{% endif %}
+                         style="height: 350px; border-radius: 8px;">
+                    </div>
                 </div>
             </div>
         </section>
@@ -423,27 +477,27 @@
 </div>
 
 <!-- Modal de confirmación para eliminar propiedad -->
-<div id="delete-modal" class="modal-overlay">
-    <div class="modal-container">
-        <div class="modal-header">
-            <div class="modal-icon">
-                <i class="ri-error-warning-line"></i>
+<form id="delete-form" method="POST" action="{% url 'property_delete' property.id %}">
+    {% csrf_token %}
+    <div id="delete-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background-color:#1F2937; padding:20px; border-radius:10px; width:90%; max-width:500px;">
+            <div style="display:flex; align-items:center; margin-bottom:20px;">
+                <div style="background-color:rgba(239,68,68,0.1); color:#EF4444; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-right:15px;">
+                    <i class="ri-error-warning-line" style="font-size:24px;"></i>
+                </div>
+                <h3 style="color:white; font-size:20px; font-weight:600;">Confirmar eliminación</h3>
             </div>
-            <h3 class="modal-title">Confirmar eliminación</h3>
-        </div>
-        <div class="modal-body">
-            <p>¿Estás seguro de que deseas eliminar la propiedad <strong>"{{ property.title }}"</strong>?</p>
-            <p class="mt-2">Esta acción no se puede deshacer y eliminará todos los datos asociados a esta propiedad.</p>
-        </div>
-        <div class="modal-footer">
-            <button id="cancel-delete" class="modal-button modal-cancel">Cancelar</button>
-            <form id="delete-form-{{ property.id }}" method="POST" action="{% url 'property_delete' property.id %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="modal-button modal-confirm">Eliminar propiedad</button>
-            </form>
+            <div style="color:#D1D5DB; margin-bottom:20px;">
+                <p>¿Estás seguro de que deseas eliminar la propiedad <strong>"{{ property.title }}"</strong>?</p>
+                <p style="margin-top:10px;">Esta acción no se puede deshacer y eliminará todos los datos asociados a esta propiedad.</p>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" id="cancel-delete" style="background-color:#374151; color:white; padding:10px 20px; border-radius:8px; font-weight:600; border:none; cursor:pointer;">Cancelar</button>
+                <button type="submit" style="background-color:#EF4444; color:white; padding:10px 20px; border-radius:8px; font-weight:600; border:none; cursor:pointer;">Eliminar propiedad</button>
+            </div>
         </div>
     </div>
-</div>
+</form>
 
 <!-- WhatsApp -->
 <a href="https://wa.me/{{ property.owner.phone|default:'1234567890' }}?text=Hola,%20quiero%20información%20sobre%20la%20propiedad:%20{{ property.title|urlencode }}"
@@ -456,32 +510,52 @@
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
-<!-- Fancybox fallback -->
-<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
 <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+<style>
+    /* Estilos adicionales para el mapa */
+    .mapboxgl-map {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+    }
+    .mapboxgl-ctrl-bottom-left,
+    .mapboxgl-ctrl-bottom-right {
+        z-index: 10;
+    }
+    .mapboxgl-popup {
+        max-width: 300px;
+    }
+    .mapboxgl-popup-content {
+        padding: 15px;
+        border-radius: 8px;
+    }
+    /* Estilos para el marcador */
+    .mapboxgl-marker {
+        cursor: pointer;
+    }
+    /* Estilos para el contenedor del mapa cuando hay error */
+    .map-error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background-color: #f3f4f6;
+        color: #6b7280;
+        padding: 2rem;
+        text-align: center;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+</style>
+<script src="{% static 'js/simple-image-viewer.js' %}"></script>
+<script src="{% static 'js/mapbox-detail.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar Fancybox para la galería
-        Fancybox.bind("[data-fancybox='gallery']", {
-            closeButton: true,
-            loop: true,
-            Toolbar: {
-                display: {
-                    left: ["infobar"],
-                    middle: ["zoomIn", "zoomOut", "toggle1to1", "rotateCCW", "rotateCW"],
-                    right: ["slideshow", "fullscreen", "thumbs", "close"],
-                },
-            },
-            Navigation: {
-                prevTpl: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>',
-                nextTpl: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>',
-            },
-        });
         // Inicializar reproductor de video con Plyr
         setTimeout(function() {
-            const videoElement = document.getElementById('property-video');
+            // Para videos locales
+            const videoElement = document.querySelector('video#property-video');
             if (videoElement) {
                 new Plyr(videoElement, {
                     controls: [
@@ -493,49 +567,32 @@
                     blankVideo: 'https://cdn.plyr.io/static/blank.mp4',
                     autoplay: false,
                     hideControls: false,
-                    keyboard: { focused: true, global: false },
-                    tooltips: { controls: true, seek: true },
                 });
             }
+            
+            // Para videos embebidos (YouTube/Vimeo)
+            const embedElements = document.querySelectorAll('.plyr__video-embed');
+            embedElements.forEach(function(element) {
+                new Plyr(element, {
+                    controls: [
+                        'play-large', 'play', 'progress', 'current-time', 'mute', 
+                        'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
+                    ],
+                });
+            });
         }, 200);
-        // Inicializar Mapbox para mostrar la ubicación
-        mapboxgl.accessToken = 'pk.eyJ1Ijoid2lsc29uYXJndWVsbG8yMDI1IiwiYSI6ImNtYm1zcmg1aDE0NTkyam9rZDRkNzF5YWoifQ.FgvTtKt3AK5uxcoz8BHtmw';
-        const mapElement = document.getElementById('mapbox-detail-map');
-        if (mapElement) {
-            const lat = {{ property.latitude|default:'null' }};
-            const lng = {{ property.longitude|default:'null' }};
-            if (lat && lng) {
-                const map = new mapboxgl.Map({
-                    container: 'mapbox-detail-map',
-                    style: 'mapbox://styles/mapbox/streets-v11',
-                    center: [lng, lat],
-                    zoom: 15,
-                    locale: 'es-ES'
-                });
-                map.addControl(new mapboxgl.NavigationControl());
-                new mapboxgl.Marker()
-                    .setLngLat([lng, lat])
-                    .addTo(map);
-            }
-        }
-        // Modal de confirmación para eliminar propiedad
+        
+        // Script para el modal de eliminación
         const deleteBtn = document.getElementById('delete-property-btn');
-        const deleteModal = document.getElementById('delete-modal');
-        const cancelBtn = document.getElementById('cancel-delete');
-        if (deleteBtn && deleteModal && cancelBtn) {
-            deleteBtn.addEventListener('click', function(e) {
+        if (deleteBtn) {
+            deleteBtn.onclick = function(e) {
                 e.preventDefault();
-                deleteModal.classList.add('active');
-            });
-            cancelBtn.addEventListener('click', function() {
-                deleteModal.classList.remove('active');
-            });
-            // Cerrar modal al hacer clic fuera
-            deleteModal.addEventListener('click', function(e) {
-                if (e.target === deleteModal) {
-                    deleteModal.classList.remove('active');
-                }
-            });
+                document.getElementById('delete-modal').style.display = 'block';
+            };
+            
+            document.getElementById('cancel-delete').onclick = function() {
+                document.getElementById('delete-modal').style.display = 'none';
+            };
         }
     });
 </script>
